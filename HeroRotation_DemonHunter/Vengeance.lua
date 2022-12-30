@@ -396,8 +396,16 @@ local function FDNoSC()
   end
 end
 
+local function SimplifiedAPL()
+  if CastAnnotated(S.Pool, false, "WAIT") then return "test Wait/Pool Resources"; end
+end
+
 -- APL Main
 local function APL()
+  if (Settings.Vengeance.UseSimplifiedRotation) then
+    return SimplifiedAPL()
+  end
+
   Enemies8yMelee = Player:GetEnemiesInMeleeRange(8)
   if (AoEON()) then
     EnemiesCount8yMelee = #Enemies8yMelee

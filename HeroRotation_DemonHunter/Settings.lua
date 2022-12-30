@@ -46,6 +46,7 @@ HR.GUISettings.APL.DemonHunter = {
     ConserveInfernalStrike = true,
     UseFieryBrandOffensively = false,
     UseMetaOffensively = false,
+    UseSimplifiedRotation = false,
     PotionType = {
       Selected = "Power",
     },
@@ -101,6 +102,7 @@ CreatePanelOption("Slider", CP_Vengeance, "APL.DemonHunter.Vengeance.FelDevHealt
 CreatePanelOption("CheckButton", CP_Vengeance, "APL.DemonHunter.Vengeance.ConserveInfernalStrike", "Conserve Infernal Strike", "Save at least 1 Infernal Strike charge for mobility.")
 CreatePanelOption("CheckButton", CP_Vengeance, "APL.DemonHunter.Vengeance.UseFieryBrandOffensively", "Use Fiery Brand Offensively", "Check this to recommend offensive Fiery Brand usage. Otherwise, it will be saved as a defensive.")
 CreatePanelOption("CheckButton", CP_Vengeance, "APL.DemonHunter.Vengeance.UseMetaOffensively", "Use Metamorphosis Offensively", "Check this to recommend offensive Metamorphosis usage. Otherwise, it will be saved as a defensive.")
+CreatePanelOption("CheckButton", CP_Vengeance, "APL.DemonHunter.Vengeance.UseSimplifiedRotation", "Use Simplified Rotation", "Check this to use a simplified rotation.")
 CreateARPanelOptions(CP_Vengeance, "APL.DemonHunter.Vengeance")
 
 -- Havoc
