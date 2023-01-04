@@ -413,15 +413,52 @@ local function FDNoSC()
 end
 
 local function SimplifiedAPL()
-  if CastAnnotated(S.Pool, false, "WAIT") then return "test Wait/Pool Resources"; end
+  -- actions.precombat=/snapshot_stats
+  -- actions.precombat+=/variable,name=fracture_fury_gain_not_in_meta,op=setif,value=30,value_else=25,condition=set_bonus.tier29_2pc
+  -- actions.precombat+=/variable,name=fracture_fury_gain_in_meta,op=setif,value=54,value_else=45,condition=set_bonus.tier29_2pc
+  -- actions+=/demon_spikes,if=!buff.demon_spikes.up&!cooldown.pause_action.remains
+  -- actions+=/fiery_brand,if=!dot.fiery_brand.ticking
+  -- actions+=/use_item,slot=trinket1
+  -- actions+=/use_item,slot=trinket2
+  -- actions+=/the_hunt
+  --if S.TheHunt:IsCastable() then
+    --if Cast(S.TheHunt, nil, nil, not Target:IsInRange(50)) then return "the_hunt simplified 12"; end
+  --end
+  -- actions+=/soul_carver
+  --if S.SoulCarver:IsCastable() then
+    --if Cast(S.SoulCarver, nil, nil, not IsInMeleeRange) then return "soul_carver simplified 12"; end
+  --end
+  -- actions+=/fel_devastation
+  --if S.FelDevastation:IsReady() and (not S.DowninFlames:IsAvailable()) then
+    --if Cast(S.FelDevastation, Settings.Vengeance.GCDasOffGCD.FelDevastation, nil, not Target:IsInMeleeRange(20)) then return "fel_devastation main 16"; end
+  --end
+  -- actions+=/immolation_aura,if=fury.deficit>=10
+  if S.ImmolationAura:IsCastable() and Player:FuryDeficit() >= 10 then
+    if Cast(S.ImmolationAura) then return "immolation_aura simplified 22"; end
+  end
+  -- actions+=/sigil_of_flame,if=fury.deficit>=30
+  if S.SigilofFlame:IsCastable() and Target:DebuffRefreshable(S.SigilofFlameDebuff) and (Player:FuryDeficit() >= 30) then
+    if Cast(S.SigilofFlame, nil, nil, not Target:IsInRange(30)) then return "sigil_of_flame simplified 28 (Normal)"; end
+  end
+  -- actions+=/fracture,if=(spell_targets=1&fury.deficit>=variable.fracture_fury_gain)|(spell_targets>1&(soul_fragments<=3&!buff.metamorphosis.up|soul_fragments<=2))
+  if S.Fracture:IsCastable() and ((EnemiesCount8yMelee == 1 and Player:FuryDeficit() >= VarFractureFuryGain) or (EnemiesCount8yMelee > 1 and (SoulFragments <= 3 and Player:BuffUp(S.MetamorphosisBuff) or SoulFragments <= 2))) then
+    if Cast(S.Fracture, nil, nil, not IsInMeleeRange) then return "fracture simplified 26"; end
+  end
+  -- actions+=/spirit_bomb,if=soul_fragments>=5|spell_targets>1&(soul_fragments>=4|(buff.metamorphosis.up&soul_fragments>=3))
+  if S.SpiritBomb:IsReady() and (SoulFragments >= 5 or (EnemiesCount8yMelee > 1 and (SoulFragments >= 4 or SoulFragments >=3 and Player:BuffUp(S.MetamorphosisBuff)))) then
+    if Cast(S.SpiritBomb, nil, nil, not Target:IsInMeleeRange(8)) then return "spirit_bomb simplified 18 Enemy: " .. EnemiesCount8yMelee .. "Souls: " .. SoulFragments; end
+  end
+  -- actions+=/soul_cleave,if=spell_targets=1|spell_targets>1&soul_fragments=0
+  if S.SoulCleave:IsReady() and (EnemiesCount8yMelee == 1 or SoulFragments == 0) then
+    if Cast(S.SoulCleave, nil, nil, not Target:IsSpellInRange(S.SoulCleave)) then return "soul_cleave simplified 20"; end
+  end
+  -- actions+=/throw_glaive
+
+  if CastAnnotated(S.Pool, false, "WAIT") then return "Wait/Pool Resources simplified"; end
 end
 
 -- APL Main
 local function APL()
-  if (Settings.Vengeance.UseSimplifiedRotation) then
-    return SimplifiedAPL()
-  end
-
   Enemies8yMelee = Player:GetEnemiesInMeleeRange(8)
   if (AoEON()) then
     EnemiesCount8yMelee = #Enemies8yMelee
@@ -457,10 +494,11 @@ local function APL()
     if (IsTanking) then
       local ShouldReturn = Defensives(); if ShouldReturn then return ShouldReturn; end
     end
+
     -- infernal_strike
-    if S.InfernalStrike:IsCastable() and ((not Settings.Vengeance.ConserveInfernalStrike) or S.InfernalStrike:ChargesFractional() > 1.9) and (S.InfernalStrike:TimeSinceLastCast() > 2) then
-      if Cast(S.InfernalStrike, Settings.Vengeance.OffGCDasOffGCD.InfernalStrike, nil, not Target:IsInRange(30)) then return "infernal_strike main 2"; end
-    end
+    --if S.InfernalStrike:IsCastable() and ((not Settings.Vengeance.ConserveInfernalStrike) or S.InfernalStrike:ChargesFractional() > 1.9) and (S.InfernalStrike:TimeSinceLastCast() > 2) then
+      --if Cast(S.InfernalStrike, Settings.Vengeance.OffGCDasOffGCD.InfernalStrike, nil, not Target:IsInRange(30)) then return "infernal_strike main 2"; end
+    --end
     -- demon_spikes,if=!buff.demon_spikes.up&!cooldown.pause_action.remains
     -- Note: Handled via Defensives()
     -- fiery_brand,if=!talent.fiery_demise.enabled&!dot.fiery_brand.ticking
@@ -490,6 +528,11 @@ local function APL()
         if Cast(Trinket2ToUse, nil, Settings.Commons.DisplayStyle.Trinkets) then return "trinket2 main 12"; end
       end
     end
+
+    if (Settings.Vengeance.UseSimplifiedRotation) then
+      return SimplifiedAPL()
+    end
+
     -- variable,name=fracture_fury_gain,op=setif,value=variable.fracture_fury_gain_in_meta,value_else=variable.fracture_fury_gain_not_in_meta,condition=buff.metamorphosis.up
     -- Note: Moved to top of APL()
     -- run_action_list,name=the_hunt_ramp,if=variable.the_hunt_ramp_in_progress|talent.the_hunt.enabled&cooldown.the_hunt.remains<5&!dot.fiery_brand.ticking
