@@ -440,8 +440,8 @@ local function SimplifiedAPL()
   if S.SigilofFlame:IsCastable() and Target:DebuffRefreshable(S.SigilofFlameDebuff) and (Player:FuryDeficit() >= 30) then
     if Cast(S.SigilofFlame, nil, nil, not Target:IsInRange(30)) then return "sigil_of_flame simplified 28 (Normal)"; end
   end
-  -- actions+=/fracture,if=(spell_targets=1&fury.deficit>=variable.fracture_fury_gain)|(spell_targets>1&(soul_fragments<=3&!buff.metamorphosis.up|soul_fragments<=2))
-  if S.Fracture:IsCastable() and ((EnemiesCount8yMelee == 1 and Player:FuryDeficit() >= VarFractureFuryGain) or (EnemiesCount8yMelee > 1 and (SoulFragments <= 3 and Player:BuffUp(S.MetamorphosisBuff) or SoulFragments <= 2))) then
+  -- actions+=/fracture,if=(spell_targets=1&fury.deficit>=variable.fracture_fury_gain)|(spell_targets>1&(soul_fragments<=2|soul_fragments<=3&!buff.metamorphosis.up|soul_fragments>0&fury>40))
+  if S.Fracture:IsCastable() and ((EnemiesCount8yMelee == 1 and Player:FuryDeficit() >= VarFractureFuryGain) or (EnemiesCount8yMelee > 1 and (SoulFragments <= 2 or SoulFragments <= 3 and not Player:BuffUp(S.MetamorphosisBuff) or SoulFragments > 0 and Player:Fury() < 40))) then
     if Cast(S.Fracture, nil, nil, not IsInMeleeRange) then return "fracture simplified 26"; end
   end
   -- actions+=/spirit_bomb,if=soul_fragments>=5|spell_targets>1&(soul_fragments>=4|(buff.metamorphosis.up&soul_fragments>=3))
