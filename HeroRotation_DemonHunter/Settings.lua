@@ -32,6 +32,7 @@ HR.GUISettings.APL.DemonHunter = {
     },
     -- {Display OffGCD as OffGCD, ForceReturn}
     GCDasOffGCD = {
+      SigilOfFlame = false,
     },
     OffGCDasOffGCD = {
       Disrupt = true,
@@ -50,10 +51,12 @@ HR.GUISettings.APL.DemonHunter = {
     PotionType = {
       Selected = "Power",
     },
+    DisplayStyle = {
+      Defensives = "SuggestedRight",
+    },
     -- {Display OffGCD as OffGCD, ForceReturn}
     OffGCDasOffGCD = {
       -- Abilities
-      DemonSpikes = true,
       InfernalStrike = false,
     },
     GCDasOffGCD = {
@@ -79,7 +82,6 @@ HR.GUISettings.APL.DemonHunter = {
       EyeBeam = false,
       GlaiveTempest = false,
       ImmolationAura = false,
-      SigilOfFlame = false,
       ThrowGlaive = false,
     },
   }
