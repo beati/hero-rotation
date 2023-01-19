@@ -63,28 +63,11 @@ local equip = Player:GetEquipment()
 local trinket1 = equip[13] and Item(equip[13]) or Item(0)
 local trinket2 = equip[14] and Item(equip[14]) or Item(0)
 
--- Legendaries
-local DeepFocusEquipped = Player:HasLegendaryEquipped(46)
-local FrenzybandEquipped = Player:HasLegendaryEquipped(54)
-local CateyeCurioEquipped = Player:HasLegendaryEquipped(57)
-
--- Player Covenant
--- 0: none, 1: Kyrian, 2: Venthyr, 3: Night Fae, 4: Necrolord
-local CovenantID = Player:CovenantID()
-
--- Update CovenantID if we change Covenants
-HL:RegisterForEvent(function()
-  CovenantID = Player:CovenantID()
-end, "COVENANT_CHOSEN")
-
 -- Event Registration
 HL:RegisterForEvent(function()
   equip = Player:GetEquipment()
   trinket1 = equip[13] and Item(equip[13]) or Item(0)
   trinket2 = equip[14] and Item(equip[14]) or Item(0)
-  DeepFocusEquipped = Player:HasLegendaryEquipped(46)
-  FrenzybandEquipped = Player:HasLegendaryEquipped(54)
-  CateyeCurioEquipped = Player:HasLegendaryEquipped(57)
 end, "PLAYER_EQUIPMENT_CHANGED")
 
 HL:RegisterForEvent(function()
@@ -395,9 +378,6 @@ local function Cooldown()
   -- convoke_the_spirits,if=buff.tigers_fury.up&combo_points<3|fight_remains<5
   if S.ConvoketheSpirits:IsReady() and (Player:BuffUp(S.TigersFury) and ComboPoints < 3 or FightRemains < 5) then
     if Cast(S.ConvoketheSpirits, nil, Settings.Commons.DisplayStyle.Signature, not Target:IsInMeleeRange(8)) then return "convoke_the_spirits cooldown 6"; end
-  end
-  if S.ConvoketheSpiritsCov:IsReady() and (Player:BuffUp(S.TigersFury) and ComboPoints < 3 or FightRemains < 5) then
-    if Cast(S.ConvoketheSpiritsCov, nil, Settings.Commons.DisplayStyle.Signature, not Target:IsInMeleeRange(8)) then return "convoke_the_spirits covenant cooldown 6"; end
   end
   -- berserking
   if S.Berserking:IsCastable() then
