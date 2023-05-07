@@ -44,6 +44,7 @@ Spell.Druid.Commons = {
   Maim                                  = Spell(22570),
   MightyBash                            = Spell(5211),
   MoonkinForm                           = MultiSpell(24858,197625),
+  NaturesVigil                          = Spell(124974),
   Rake                                  = Spell(1822),
   Rip                                   = Spell(1079),
   SkullBash                             = Spell(106839),
@@ -173,8 +174,11 @@ Spell.Druid.Feral = MergeTableByKey(Spell.Druid.Commons, {
   -- Talents
   AdaptiveSwarm                         = Spell(391888),
   ApexPredatorsCraving                  = Spell(391881),
+  AshamanesGuidance                     = Spell(391548),
   Berserk                               = Spell(106951),
+  BerserkHeartoftheLion                 = Spell(391174),
   Bloodtalons                           = Spell(319439),
+  CircleofLifeandDeath                  = Spell(400320),
   BrutalSlash                           = Spell(202028),
   DoubleClawedRake                      = Spell(391700),
   FeralFrenzy                           = Spell(274837),
@@ -190,7 +194,9 @@ Spell.Druid.Feral = MergeTableByKey(Spell.Druid.Commons, {
   SouloftheForest                       = Spell(158476),
   Swipe                                 = Spell(106785),
   TearOpenWounds                        = Spell(391785),
+  ThrashingClaws                        = Spell(405300),
   TigersFury                            = Spell(5217),
+  WildSlashes                           = Spell(390864),
   -- Buffs
   ApexPredatorsCravingBuff              = Spell(391882),
   BloodtalonsBuff                       = Spell(145152),
@@ -200,7 +206,6 @@ Spell.Druid.Feral = MergeTableByKey(Spell.Druid.Commons, {
   AdaptiveSwarmDebuff                   = Spell(391889),
   AdaptiveSwarmHeal                     = Spell(391891),
   LIMoonfireDebuff                      = Spell(155625),
-  
 })
 
 Spell.Druid.Guardian = MergeTableByKey(Spell.Druid.Commons, {
