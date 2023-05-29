@@ -302,7 +302,7 @@ local function Cleave()
   end
   -- dimensional_rift,if=soul_shard<4.7&(charges>2|time_to_die<cooldown.dimensional_rift.duration)
   if CDsON() and S.DimensionalRift:IsCastable() and (Player:SoulShardsP() < 4.7 and (S.DimensionalRift:Charges() > 2 or FightRemains < S.DimensionalRift:Cooldown())) then
-    if Cast(S.DimensionalRift, nil, nil, not Target:IsSpellInRange(S.DimensionalRift)) then return "dimensional_rift cleave 4"; end
+    if Cast(S.DimensionalRift, Settings.Destruction.GCDasOffGCD.DimensionalRift, nil, not Target:IsSpellInRange(S.DimensionalRift)) then return "dimensional_rift cleave 4"; end
   end
   -- cataclysm,if=raid_event.adds.in>15
   if CDsON() and S.Cataclysm:IsCastable() then
@@ -323,7 +323,7 @@ local function Cleave()
   -- havoc,target_if=min:((-target.time_to_die)<?-15)+dot.immolate.remains+99*(self.target=target),if=(!cooldown.summon_infernal.up|!talent.summon_infernal)&target.time_to_die>8
   if S.Havoc:IsCastable() and (S.SummonInfernal:CooldownDown() or not S.SummonInfernal:IsAvailable()) then
     --if Everyone.CastTargetIf(S.Havoc, Enemies40y, "min", EvaluateTargetIfFilterHavoc, EvaluateTargetIfHavoc, not Target:IsSpellInRange(S.Havoc)) then return "havoc cleave 14"; end
-    local BestUnit, BestConditionValue, CUCV = nil, nil
+    local BestUnit, BestConditionValue, CUCV = nil, nil, nil
     for _, CycleUnit in pairs(Enemies40y) do
       if CycleUnit:GUID() ~= Target:GUID() then
         if BestConditionValue then
@@ -385,7 +385,7 @@ local function Cleave()
   end
   -- dimensional_rift
   if CDsON() and S.DimensionalRift:IsCastable() then
-    if Cast(S.DimensionalRift, nil, nil, not Target:IsSpellInRange(S.DimensionalRift)) then return "dimensional_rift cleave 38"; end
+    if Cast(S.DimensionalRift, Settings.Destruction.GCDasOffGCD.DimensionalRift, nil, not Target:IsSpellInRange(S.DimensionalRift)) then return "dimensional_rift cleave 38"; end
   end
   -- chaos_bolt,if=soul_shard>3.5&!variable.pool_soul_shards
   if S.ChaosBolt:IsReady() and (Player:SoulShardsP() > 3.5 and not VarPoolSoulShards) then
@@ -505,7 +505,7 @@ local function Aoe()
   end
   -- dimensional_rift
   if CDsON() and S.DimensionalRift:IsCastable() then
-    if Cast(S.DimensionalRift, nil, nil, not Target:IsSpellInRange(S.DimensionalRift)) then return "dimensional_rift aoe 36"; end
+    if Cast(S.DimensionalRift, Settings.Destruction.GCDasOffGCD.DimensionalRift, nil, not Target:IsSpellInRange(S.DimensionalRift)) then return "dimensional_rift aoe 36"; end
   end
   -- incinerate
   if S.Incinerate:IsCastable() then
@@ -574,7 +574,7 @@ local function APL()
     end
     -- dimensional_rift,if=soul_shard<4.7&(charges>2|time_to_die<cooldown.dimensional_rift.duration)
     if CDsON() and S.DimensionalRift:IsCastable() and (Player:SoulShardsP() < 4.7 and (S.DimensionalRift:Charges() > 2 or FightRemains < S.DimensionalRift:Cooldown())) then
-      if Cast(S.DimensionalRift, nil, nil, not Target:IsSpellInRange(S.DimensionalRift)) then return "dimensional_rift main 4"; end
+      if Cast(S.DimensionalRift, Settings.Destruction.GCDasOffGCD.DimensionalRift, nil, not Target:IsSpellInRange(S.DimensionalRift)) then return "dimensional_rift main 4"; end
     end
     -- cataclysm,if=raid_event.adds.in>15
     if CDsON() and S.Cataclysm:IsReady() then
@@ -638,7 +638,7 @@ local function APL()
     end
     -- dimensional_rift
     if CDsON() and S.DimensionalRift:IsCastable() then
-      if Cast(S.DimensionalRift, nil, nil, not Target:IsSpellInRange(S.DimensionalRift)) then return "dimensional_rift main 36"; end
+      if Cast(S.DimensionalRift, Settings.Destruction.GCDasOffGCD.DimensionalRift, nil, not Target:IsSpellInRange(S.DimensionalRift)) then return "dimensional_rift main 36"; end
     end
     -- chaos_bolt,if=soul_shard>3.5
     if S.ChaosBolt:IsReady() and (Player:SoulShardsP() >= 3.5) then
