@@ -411,7 +411,7 @@
             end
             -- Special Checks
             if GetCVar("nameplateShowEnemies") ~= "1" then
-              HR.Print("It looks like enemy nameplates are disabled, you should enable them in order to get proper AoE rotation.");
+              HR.Print("It looks like enemy nameplates are disabled. This may cause the addon to operate incorrectly, leading to incorrect or missing spell suggestions.");
             end
           else
             HR.Print("No Rotation found for this class/spec (SpecID: ".. SpecID .. "), addon disabled. This is likely due to the rotation being unsupported at this time. Please check supported rotations here: https://github.com/herotc/hero-rotation#supported-rotations");
@@ -445,7 +445,7 @@
           HL.CacheHasBeenReset = false;
           Cache.Reset();
           -- Rotational Debug Output
-          if HR.GUISettings.General.RotationDebugOutput then
+          if HR.DebugON() then
             CurrResult = HR.APLs[SpecID]();
             if CurrResult and CurrResult ~= PrevResult then
               HR.Print(CurrResult);

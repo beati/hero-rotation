@@ -218,6 +218,8 @@ Spell.Rogue.Subtlety = MergeTableByKey(Spell.Rogue.Commons, {
   -- Talents
   DanseMacabre            = Spell(382528),
   DanseMacabreBuff        = Spell(393969),
+  DeeperDaggers           = Spell(382517),
+  DeeperDaggersBuff       = Spell(383405),
   DarkBrew                = Spell(382504),
   DarkShadow              = Spell(245687),
   EnvelopingShadows       = Spell(238104),
@@ -228,10 +230,12 @@ Spell.Rogue.Subtlety = MergeTableByKey(Spell.Rogue.Commons, {
   Flagellation            = Spell(384631),
   FlagellationPersistBuff = Spell(394758),
   Gloomblade              = Spell(200758),
+  ImprovedShadowDance     = Spell(393972),
   ImprovedShurikenStorm   = Spell(319951),
   LingeringShadow         = Spell(382524),
   LingeringShadowBuff     = Spell(385960),
   MasterofShadows         = Spell(196976),
+  PerforatedVeins         = Spell(382518),
   PerforatedVeinsBuff     = Spell(394254),
   PreyontheWeak           = Spell(131511),
   PreyontheWeakDebuff     = Spell(255909),
@@ -243,6 +247,7 @@ Spell.Rogue.Subtlety = MergeTableByKey(Spell.Rogue.Commons, {
   ShurikenTornado         = Spell(277925),
   SilentStorm             = Spell(385722),
   SilentStormBuff         = Spell(385727),
+  TheFirstDance           = Spell(382505),
   TheRotten               = Spell(382015),
   TheRottenBuff           = Spell(394203),
   Weaponmaster            = Spell(193537),
@@ -265,6 +270,8 @@ Item.Rogue.Outlaw = {
 Item.Rogue.Subtlety = {
   -- Trinkets
   ManicGrieftorch         = Item(194308, {13, 14}),
+  StormEatersBoon         = Item(194302, {13, 14}),
+  BeaconToTheBeyond       = Item(203963, {13, 14})
 }
 
 function Commons.StealthSpell()
@@ -320,7 +327,7 @@ do
 
   local PoisonRemains = 0
   local UsingWoundPoison = false
-  
+
   local function CastPoison(Poison)
     PoisonRemains = Player:BuffRemains(Poison)
     if PoisonRemains < (Player:AffectingCombat() and Settings.Commons.PoisonRefreshCombat * 60 or Settings.Commons.PoisonRefresh * 60) then
@@ -404,7 +411,7 @@ do
   local SecretStratagem = Spell(394320)
 
   function Commons.CPMaxSpend()
-    return 5 + (DeeperStratagem:IsAvailable() and 1 or 0) + (DeviousStratagem:IsAvailable() and 1 or 0) + (SecretStratagem:IsAvailable() and 1 or 0) 
+    return 5 + (DeeperStratagem:IsAvailable() and 1 or 0) + (DeviousStratagem:IsAvailable() and 1 or 0) + (SecretStratagem:IsAvailable() and 1 or 0)
   end
 end
 

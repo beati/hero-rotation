@@ -108,7 +108,7 @@ local function Defensives()
   if S.ArdentDefender:IsCastable() and (Player:HealthPercentage() <= Settings.Protection.ArdentDefenderHP and Player:BuffDown(S.GuardianofAncientKingsBuff)) then
     if Cast(S.ArdentDefender, nil, Settings.Protection.DisplayStyle.Defensives) then return "ardent_defender defensive 6"; end
   end
-  if S.WordofGlory:IsReady() and (Player:HealthPercentage() <= Settings.Protection.WordofGloryHP and not Player:HealingAbsorbed()) then
+  if S.WordofGlory:IsReady() and (Player:HealthPercentage() <= Settings.Protection.PrioSelfWordofGloryHP and not Player:HealingAbsorbed()) then
     -- cast word of glory on us if it's a) free or b) probably not going to drop sotr
     if (Player:BuffRemains(S.ShieldoftheRighteousBuff) >= 5 or Player:BuffUp(S.DivinePurposeBuff) or Player:BuffUp(S.ShiningLightFreeBuff)) then
       if Cast(S.WordofGlory) then return "word_of_glory defensive 8"; end
@@ -117,7 +117,7 @@ local function Defensives()
       if HR.CastAnnotated(S.WordofGlory, false, "KITE") then return "word_of_glory defensive 10"; end
     end
   end
-  if S.ShieldoftheRighteous:IsReady() and (Player:BuffRefreshable(S.ShieldoftheRighteousBuff) and (ActiveMitigationNeeded or Player:HealthPercentage() <= Settings.Protection.ShieldoftheRighteousHP)) then
+  if S.ShieldoftheRighteous:IsReady() and (Player:BuffRefreshable(S.ShieldoftheRighteousBuff) and (ActiveMitigationNeeded or Player:HealthPercentage() <= Settings.Protection.SotRHP)) then
     if Cast(S.ShieldoftheRighteous, nil, Settings.Protection.DisplayStyle.ShieldOfTheRighteous) then return "shield_of_the_righteous defensive 14"; end
   end
 end
@@ -208,8 +208,8 @@ local function Standard()
   if S.Consecration:IsCastable() and (Player:BuffDown(S.ConsecrationBuff)) then
     if Cast(S.Consecration) then return "consecration standard 18"; end
   end
-  -- eye_of_tyr
-  if CDsON() and S.EyeofTyr:IsCastable() then
+  -- eye_of_tyr,if=talent.inmost_light.enabled&raid_event.adds.in>=45
+  if CDsON() and S.EyeofTyr:IsCastable() and (S.InmostLight:IsAvailable()) then
     if Cast(S.EyeofTyr, nil, nil, not Target:IsInMeleeRange(8)) then return "eye_of_tyr standard 20"; end
   end
   -- blessed_hammer
@@ -223,6 +223,10 @@ local function Standard()
   -- crusader_strike
   if S.CrusaderStrike:IsCastable() then
     if Cast(S.CrusaderStrike, nil, nil, not Target:IsInMeleeRange(5)) then return "crusader_strike standard 26"; end
+  end
+  -- eye_of_tyr,if=!talent.inmost_light.enabled&raid_event.adds.in>=60
+  if CDsON() and S.EyeofTyr:IsCastable() and (not S.InmostLight:IsAvailable()) then
+    if Cast(S.EyeofTyr, nil, nil, not Target:IsInMeleeRange(8)) then return "eye_of_tyr standard 27"; end
   end
   -- word_of_glory,if=buff.shining_light_free.up
   if S.WordofGlory:IsReady() and (Player:BuffUp(S.ShiningLightFreeBuff)) then

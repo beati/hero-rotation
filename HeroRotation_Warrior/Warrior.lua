@@ -169,6 +169,7 @@ Spell.Warrior.Protection = MergeTableByKey(Spell.Warrior.Commons, {
   ShieldBlock                           = Spell(2565),
   ShieldSlam                            = Spell(23922),
   -- Talents
+  Avatar                                = Spell(401150),
   BarbaricTraining                      = Spell(390675),
   Bolster                               = Spell(280001),
   BoomingVoice                          = Spell(202743),
@@ -193,6 +194,8 @@ Spell.Warrior.Protection = MergeTableByKey(Spell.Warrior.Commons, {
   UnnervingFocus                        = Spell(384042),
   UnstoppableForce                      = Spell(275336),
   -- Buffs
+  AvatarBuff                            = Spell(401150),
+  EarthenTenacityBuff                   = Spell(410218), -- T30 4P
   LastStandBuff                         = Spell(12975),
   RallyingCryBuff                       = Spell(97463),
   RevengeBuff                           = Spell(5302),
@@ -200,7 +203,7 @@ Spell.Warrior.Protection = MergeTableByKey(Spell.Warrior.Commons, {
   ShieldBlockBuff                       = Spell(132404),
   ShieldWallBuff                        = Spell(871),
   ViolentOutburstBuff                   = Spell(386478),
-  VanguardsDeterminationBuff            = Spell(394056),--T29 2P
+  VanguardsDeterminationBuff            = Spell(394056), -- T29 2P
   -- Debuffs
   RendDebuff                            = Spell(388539),
 })
