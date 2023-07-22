@@ -24,6 +24,7 @@ local HR         = HeroRotation
 if not Spell.Warlock then Spell.Warlock = {} end
 Spell.Warlock.Commons = {
   -- Racials
+  AncestralCall                         = Spell(274738),
   Berserking                            = Spell(26297),
   BloodFury                             = Spell(33702),
   Fireblood                             = Spell(265221),
@@ -54,6 +55,7 @@ Spell.Warlock.Demonology = MergeTableByKey(Spell.Warlock.Commons, {
   -- Base Abilities
   Felstorm                              = Spell(89751),
   HandofGuldan                          = Spell(105174), -- Splash, 8
+  ShadowBoltLineCD                      = Spell(686),
   SummonPet                             = Spell(30146),
   -- Talents
   BilescourgeBombers                    = Spell(267211), -- Splash, 8
@@ -84,6 +86,7 @@ Spell.Warlock.Demonology = MergeTableByKey(Spell.Warlock.Commons, {
   DemonicPowerBuff                      = Spell(265273),
   FelCovenantBuff                       = Spell(387437),
   NetherPortalBuff                      = Spell(267218),
+  RiteofRuvaraadBuff                    = Spell(409725), -- T30 4pc
   -- Debuffs
   DoomDebuff                            = Spell(603),
   FromtheShadowsDebuff                  = Spell(270569),
