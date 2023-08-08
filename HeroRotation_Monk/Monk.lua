@@ -76,6 +76,7 @@ Spell.Monk.Commons = {
   RushingJadeWindBuff                   = Spell(116847),
   -- Debuffs
   -- Item Effects
+  CalltoDominanceBuff                   = Spell(403380), -- Neltharion trinket buff
   TheEmperorsCapacitorBuff              = Spell(235054),
   -- Misc
   PoolEnergy                            = Spell(999910),
@@ -90,6 +91,7 @@ Spell.Monk.Windwalker = MergeTableByKey(Spell.Monk.Commons, {
   SpinningCraneKick                     = Spell(101546),
   -- Talents
   CraneVortex                           = Spell(388848),
+  DrinkingHornCover                     = Spell(391370),
   FaelineHarmony                        = Spell(391412),
   FaelineStomp                          = Spell(388193),
   FistsofFury                           = Spell(113656),
@@ -100,6 +102,7 @@ Spell.Monk.Windwalker = MergeTableByKey(Spell.Monk.Commons, {
   Serenity                              = Spell(152173),
   ShadowboxingTreads                    = Spell(392982),
   Skyreach                              = Spell(392991),
+  Skytouch                              = Spell(405044),
   StormEarthAndFire                     = Spell(137639),
   StormEarthAndFireFixate               = Spell(221771),
   StrikeoftheWindlord                   = Spell(392983),
@@ -126,6 +129,7 @@ Spell.Monk.Windwalker = MergeTableByKey(Spell.Monk.Commons, {
   -- Debuffs
   FaeExposureDebuff                     = Spell(395414),
   MarkoftheCraneDebuff                  = Spell(228287),
+  SkyreachCritDebuff                    = Spell(393047),
   SkyreachExhaustionDebuff              = Spell(393050),
   -- Tier 29 Effects
   KicksofFlowingMomentumBuff            = Spell(394944),
