@@ -60,6 +60,7 @@ HR.GUISettings.APL.DemonHunter = {
       InfernalStrike = false,
     },
     GCDasOffGCD = {
+      BulkExtraction = false,
       FelDevastation = false,
       FieryBrand = false,
     }
