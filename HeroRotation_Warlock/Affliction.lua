@@ -47,7 +47,7 @@ local OnUseExcludes = {
 
 -- Enemies
 local Enemies40y, Enemies10ySplash, EnemiesCount10ySplash
-local VarPSUp, VarVTUp, VarVTPSUp VarSRUp, VarCDDoTsUp, VarHasCDs, VarCDsActive
+local VarPSUp, VarVTUp, VarVTPSUp, VarSRUp, VarCDDoTsUp, VarHasCDs, VarCDsActive
 local BossFightRemains = 11111
 local FightRemains = 11111
 
@@ -317,10 +317,6 @@ local function Cleave()
   -- summon_darkglare
   if CDsON() and S.SummonDarkglare:IsCastable() then
     if Cast(S.SummonDarkglare, Settings.Affliction.GCDasOffGCD.SummonDarkglare) then return "summon_darkglare cleave 26"; end
-  end
-  -- malefic_rapture,if=talent.malefic_affliction&buff.malefic_affliction.stack<3
-  if S.MaleficRapture:IsReady() and S.MaleficAffliction:IsAvailable() and Player:BuffStack(S.MaleficAfflictionBuff) < 3 then
-    if Cast(S.MaleficRapture, nil, nil, not Target:IsInRange(100)) then return "malefic_rapture cleave 28"; end
   end
   -- malefic_rapture,if=talent.dread_touch&debuff.dread_touch.remains<gcd
   if S.MaleficRapture:IsReady() and S.DreadTouch:IsAvailable() and Target:DebuffRemains(S.DreadTouchDebuff) < Player:GCD() then
