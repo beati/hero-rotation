@@ -41,7 +41,6 @@ Spell.Warlock.Commons = {
   InquisitorsGazeBuff                   = Spell(388068),
   Soulburn                              = Spell(385899),
   -- Buffs
-  PowerInfusionBuff                     = Spell(10060),
   -- Debuffs
   -- Command Demon Abilities
   AxeToss                               = Spell(119914),
@@ -64,19 +63,17 @@ Spell.Warlock.Demonology = MergeTableByKey(Spell.Warlock.Commons, {
   DemonicCalling                        = Spell(205145),
   DemonicStrength                       = Spell(267171),
   Doom                                  = Spell(603),
-  FelCovenant                           = Spell(387432),
-  FromtheShadows                        = Spell(267170),
   GrandWarlocksDesign                   = Spell(387084),
   GrimoireFelguard                      = Spell(111898),
   Guillotine                            = Spell(386833),
-  ImpGangBoss                           = Spell(387445),
   Implosion                             = Spell(196277), -- Splash, 8
   InnerDemons                           = Spell(267216),
   NetherPortal                          = Spell(267217),
   PowerSiphon                           = Spell(264130),
+  ReignofTyranny                        = Spell(427684),
   SacrificedSouls                       = Spell(267214),
   SoulboundTyrant                       = Spell(334585),
-  SoulStrike                            = Spell(264057),
+  SoulStrike                            = Spell(428344),
   SummonDemonicTyrant                   = Spell(265187),
   SummonVilefiend                       = Spell(264119),
   TheExpendables                        = Spell(387600),
@@ -84,11 +81,11 @@ Spell.Warlock.Demonology = MergeTableByKey(Spell.Warlock.Commons, {
   DemonicCallingBuff                    = Spell(205146),
   DemonicCoreBuff                       = Spell(264173),
   DemonicPowerBuff                      = Spell(265273),
-  FelCovenantBuff                       = Spell(387437),
   NetherPortalBuff                      = Spell(267218),
   RiteofRuvaraadBuff                    = Spell(409725), -- T30 4pc
   -- Debuffs
   DoomDebuff                            = Spell(603),
+  DoomBrandDebuff                       = Spell(423583), -- T31 2pc
   FromtheShadowsDebuff                  = Spell(270569),
 })
 
@@ -126,6 +123,7 @@ Spell.Warlock.Affliction = MergeTableByKey(Spell.Warlock.Commons, {
   NightfallBuff                         = Spell(264571),
   MaleficAfflictionBuff                 = Spell(389845),
   TormentedCrescendoBuff                = Spell(387079),
+  UmbrafireKindlingBuff                 = Spell(423765), -- T31 4pc
   -- Debuffs
   AgonyDebuff                           = Spell(980),
   CorruptionDebuff                      = Spell(146739),
@@ -154,7 +152,9 @@ Spell.Warlock.Destruction = MergeTableByKey(Spell.Warlock.Commons, {
   ChannelDemonfire                      = Spell(196447),
   ChaosBolt                             = Spell(116858),
   ChaosIncarnate                        = Spell(387275),
+  Chaosbringer                          = Spell(422057),
   Conflagrate                           = Spell(17962),
+  CrashingChaos                         = Spell(417234),
   CryHavoc                              = Spell(387522),
   DiabolicEmbers                        = Spell(387173),
   DimensionalRift                       = Spell(387976),
@@ -194,14 +194,17 @@ if not Item.Warlock then Item.Warlock = {} end
 Item.Warlock.Commons = {
   -- Trinkets
   BeacontotheBeyond                     = Item(203963, {13, 14}),
+  BelorrelostheSuncaller                = Item(207172, {13, 14}),
   ConjuredChillglobe                    = Item(194300, {13, 14}),
   DesperateInvokersCodex                = Item(194310, {13, 14}),
   EruptingSpearFragment                 = Item(193769, {13, 14}),
   IcebloodDeathsnare                    = Item(194304, {13, 14}),
   IrideusFragment                       = Item(193743, {13, 14}),
   NeltharionsCallToDominance            = Item(204202, {13, 14}),
+  NymuesUnravelingSpindle               = Item(208615, {13, 14}),
   RotcrustedVoodooDoll                  = Item(159624, {13, 14}),
   SpoilsofNeltharus                     = Item(193773, {13, 14}),
+  TimeThiefsGambit                      = Item(207579, {13, 14}),
   TimebreachingTalon                    = Item(193791, {13, 14}),
   VoidmendersShadowgem                  = Item(110007, {13, 14}),
   -- Other Items

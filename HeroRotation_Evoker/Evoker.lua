@@ -50,7 +50,6 @@ Spell.Evoker.Commons = {
   FireBreathDebuff                      = Spell(357209),
   HoverBuff                             = Spell(358267),
   LeapingFlamesBuff                     = Spell(370901),
-  PowerInfusionBuff                     = Spell(10060),
   ScarletAdaptationBuff                 = Spell(372470),
   SourceofMagicBuff                     = Spell(369459),
   -- Trinket Effects
@@ -87,6 +86,8 @@ Spell.Evoker.Augmentation = MergeTableByKey(Spell.Evoker.Commons, {
   EbonMightOtherBuff                    = Spell(395152),
   EbonMightSelfBuff                     = Spell(395296),
   EssenceBurstBuff                      = Spell(392268),
+  PrescienceBuff                        = Spell(410089),
+  TremblingEarthBuff                    = Spell(424368), -- T31 4pc
   -- Debuffs
   TemporalWoundDebuff                   = Spell(409560),
 })
@@ -123,6 +124,7 @@ Spell.Evoker.Devastation = MergeTableByKey(Spell.Evoker.Commons, {
   BlazingShardsBuff                     = Spell(409848),
   BurnoutBuff                           = Spell(375802),
   ChargedBlastBuff                      = Spell(370454),
+  EmeraldTranceBuff                     = Spell(424155), -- T31 2pc
   EssenceBurstBuff                      = Spell(359618),
   IridescenceBlueBuff                   = MultiSpell(386399,399370),
   IridescenceRedBuff                    = Spell(386353),
@@ -137,11 +139,20 @@ Spell.Evoker.Devastation = MergeTableByKey(Spell.Evoker.Commons, {
 if not Item.Evoker then Item.Evoker = {} end
 Item.Evoker.Commons = {
   -- Trinkets
-  CrimsonAspirantsBadgeofFerocity       = Item(201449, {13, 14}),
-  -- Items
-  KharnalexTheFirstLight                = Item(195519, {16}),
-  -- Trinkets
+  AshesoftheEmbersoul                   = Item(207167, {13, 14}),
+  BalefireBranch                        = Item(159630, {13, 14}),
+  BeacontotheBeyond                     = Item(203963, {13, 14}),
+  BelorrelostheSuncaller                = Item(207172, {13, 14}),
+  DragonfireBombDispenser               = Item(202610, {13, 14}),
+  IrideusFragment                       = Item(193743, {13, 14}),
+  MirrorofFracturedTomorrows            = Item(207581, {13, 14}),
+  NeltharionsCalltoChaos                = Item(204201, {13, 14}),
+  NymuesUnravelingSpindle               = Item(208615, {13, 14}),
   SpoilsofNeltharus                     = Item(193773, {13, 14}),
+  -- Items
+  Dreambinder                           = Item(208616, {16}),
+  Iridal                                = Item(208321, {16}),
+  KharnalexTheFirstLight                = Item(195519, {16}),
   -- Trinkets (SL)
   ShadowedOrbofTorment                  = Item(186428, {13, 14}),
 }

@@ -66,7 +66,10 @@ Spell.Warrior.Commons = {
   -- Buffs
   AvatarBuff                            = Spell(107574),
   BattleShoutBuff                       = Spell(6673),
+  ElysianMightBuff                      = Spell(386286),
   WarMachineBuff                        = Spell(262232),
+  -- Debuffs
+  MarkofFyralathDebuff                  = Spell(414532),
   -- Pool
   Pool                                  = Spell(999910),
 }
@@ -87,6 +90,7 @@ Spell.Warrior.Fury = MergeTableByKey(Spell.Warrior.Commons, {
   DancingBlades                         = Spell(391683),
   Frenzy                                = Spell(335077),
   ImprovedWhilwind                      = Spell(12950),
+  Massacre                              = Spell(206315),
   MeatCleaver                           = Spell(280392),
   OdynsFury                             = Spell(385059),
   Onslaught                             = Spell(315720),
@@ -107,10 +111,13 @@ Spell.Warrior.Fury = MergeTableByKey(Spell.Warrior.Commons, {
   DancingBladesBuff                     = Spell(391688),
   EnrageBuff                            = Spell(184362),
   FrenzyBuff                            = Spell(335082),
+  FuriousBloodthirstBuff                = Spell(423211), -- T31 2pc
   MeatCleaverBuff                       = Spell(85739),
   MercilessAssaultBuff                  = Spell(409983),
   RecklessnessBuff                      = Spell(1719),
   SuddenDeathBuff                       = Spell(280776),
+  -- Debuffs
+  GushingWoundDebuff                    = Spell(385042),
 })
 
 Spell.Warrior.Arms = MergeTableByKey(Spell.Warrior.Commons, {
@@ -123,6 +130,7 @@ Spell.Warrior.Arms = MergeTableByKey(Spell.Warrior.Commons, {
   Battlelord                            = Spell(386630),
   BlademastersTorment                   = Spell(390138),
   Bladestorm                            = MultiSpell(227847, 389774),
+  Bloodletting                          = Spell(383154),
   Cleave                                = Spell(845),
   ColossusSmash                         = MultiSpell(167105, 262161),
   Dreadnaught                           = Spell(262150),
@@ -130,12 +138,15 @@ Spell.Warrior.Arms = MergeTableByKey(Spell.Warrior.Commons, {
   FervorofBattle                        = Spell(202316),
   Hurricane                             = Spell(390563),
   IgnorePain                            = Spell(190456),
+  ImprovedSlam                          = Spell(400205),
+  ImprovedSweepingStrikes               = Spell(383155),
   Juggernaut                            = Spell(383292),
   Massacre                              = Spell(281001),
   MercilessBonegrinder                  = Spell(383317),
   MortalStrike                          = Spell(12294),
   Overpower                             = Spell(7384),
   Rend                                  = Spell(772),
+  SharpenedBlades                       = Spell(383341),
   Skullsplitter                         = Spell(260643),
   StormofSwords                         = Spell(385512),
   SuddenDeath                           = Spell(29725),
@@ -147,6 +158,7 @@ Spell.Warrior.Arms = MergeTableByKey(Spell.Warrior.Commons, {
   WarlordsTorment                       = Spell(390140),
   -- Buffs
   BattlelordBuff                        = Spell(386631),
+  CollateralDamageBuff                  = Spell(334783),
   CrushingAdvanceBuff                   = Spell(410138),
   HurricaneBuff                         = Spell(390581),
   JuggernautBuff                        = Spell(383292),
@@ -196,6 +208,7 @@ Spell.Warrior.Protection = MergeTableByKey(Spell.Warrior.Commons, {
   -- Buffs
   AvatarBuff                            = Spell(401150),
   EarthenTenacityBuff                   = Spell(410218), -- T30 4P
+  FervidBuff                            = Spell(425517), -- T31 2P
   LastStandBuff                         = Spell(12975),
   RallyingCryBuff                       = Spell(97463),
   RevengeBuff                           = Spell(5302),
@@ -220,6 +233,8 @@ Item.Warrior.Commons = {
   IrideusFragment                       = Item(193743, {13, 14}),
   ManicGrieftorch                       = Item(194308, {13, 14}),
   VialofAnimatedBlood                   = Item(159625, {13, 14}),
+  -- Other Items
+  Fyralath                              = Item(206448, {16}),
 }
 
 Item.Warrior.Fury = MergeTableByKey(Item.Warrior.Commons, {

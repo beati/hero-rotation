@@ -67,6 +67,7 @@ Spell.Paladin.Commons = {
   -- Debuffs
   ConsecrationDebuff                    = Spell(204242),
   JudgmentDebuff                        = Spell(197277),
+  MarkofFyralathDebuff                  = Spell(414532),
   -- Pool
   Pool                                  = Spell(999910),
 }
@@ -79,6 +80,7 @@ Spell.Paladin.Protection = MergeTableByKey(Spell.Paladin.Commons, {
   AvengersShield                        = Spell(31935),
   BastionofLight                        = Spell(378974),
   BlessedHammer                         = Spell(204019),
+  BulwarkofRighteousFury                = Spell(386653),
   CrusadersJudgment                     = Spell(204023),
   DivineToll                            = Spell(375576),
   EyeofTyr                              = Spell(387174),
@@ -91,6 +93,7 @@ Spell.Paladin.Protection = MergeTableByKey(Spell.Paladin.Commons, {
   -- Buffs
   ArdentDefenderBuff                    = Spell(31850),
   BastionofLightBuff                    = Spell(378974),
+  BulwarkofRighteousFuryBuff            = Spell(386652),
   GuardianofAncientKingsBuff            = MultiSpell(86659,212641),
   MomentofGloryBuff                     = Spell(327193),
   SanctificationBuff                    = Spell(424616), -- T31, 2pc
@@ -180,7 +183,9 @@ Item.Paladin.Protection = MergeTableByKey(Item.Paladin.Commons, {
 
 Item.Paladin.Retribution = MergeTableByKey(Item.Paladin.Commons, {
   -- Other On-Use Items
+  Fyralath                              = Item(206448, {16}),
   ShadowedRazingAnnihilator             = Item(205046, {16}),
+  
 })
 
 Item.Paladin.Holy = MergeTableByKey(Item.Paladin.Commons, {

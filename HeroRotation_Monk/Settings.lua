@@ -33,6 +33,7 @@ HR.GUISettings.APL.Monk = {
       LegSweep = true,
       RingOfPeace = true,
       Paralysis = true,
+      SummonWhiteTigerStatue = true,
     },
     -- {Display OffGCD as OffGCD, ForceReturn}
     OffGCDasOffGCD = {
@@ -55,7 +56,7 @@ HR.GUISettings.APL.Monk = {
     -- {Display GCD as OffGCD, ForceReturn}
     GCDasOffGCD = {
       -- Abilities
-      BreathofFire           = false,
+      BreathOfFire           = false,
       ExpelHarm              = false,
       ExplodingKeg           = false,
       InvokeNiuzaoTheBlackOx = true,
