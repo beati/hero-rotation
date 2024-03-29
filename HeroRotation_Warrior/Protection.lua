@@ -219,9 +219,9 @@ end
 
 --- ======= ACTION LISTS =======
 local function APL()
+  Enemies8y = Player:GetEnemiesInMeleeRange(8) -- Multiple Abilities
   if AoEON() then
-    Enemies8y = Player:GetEnemiesInMeleeRange(8) -- Multiple Abilities
-    EnemiesCount8 = #Enemies8y > 0 and #Enemies8y or 1
+    EnemiesCount8 = #Enemies8y
   else
     EnemiesCount8 = 1
   end
@@ -250,7 +250,7 @@ local function APL()
       end
     end
     -- Interrupt
-    local ShouldReturn = Everyone.Interrupt(5, S.Pummel, Settings.Commons.OffGCDasOffGCD.Pummel, StunInterrupts); if ShouldReturn then return ShouldReturn; end
+    local ShouldReturn = Everyone.Interrupt(S.Pummel, Settings.Commons.OffGCDasOffGCD.Pummel, StunInterrupts); if ShouldReturn then return ShouldReturn; end
     -- auto_attack
     -- charge,if=time=0
     -- Note: Handled in Precombat
@@ -357,10 +357,10 @@ local function APL()
       SuggestRageDump(30)
       if Cast(S.DemoralizingShout, Settings.Protection.GCDasOffGCD.DemoralizingShout) then return "demoralizing_shout main 28"; end
     end
-    -- spear_of_bastion
-    if CDsON() and S.SpearofBastion:IsCastable() then
+    -- champions_spear
+    if CDsON() and S.ChampionsSpear:IsCastable() then
       SuggestRageDump(20)
-      if Cast(S.SpearofBastion, nil, Settings.Commons.DisplayStyle.Signature, not Target:IsInRange(25)) then return "spear_of_bastion main 30"; end
+      if Cast(S.ChampionsSpear, nil, Settings.Commons.DisplayStyle.Signature, not Target:IsInRange(25)) then return "champions_spear main 30"; end
     end
     -- thunderous_roar
     if CDsON() and S.ThunderousRoar:IsCastable() then
@@ -398,7 +398,7 @@ local function APL()
 end
 
 local function Init()
-  HR.Print("Protection Warrior rotation has been updated for patch 10.2.0.")
+  HR.Print("Protection Warrior rotation has been updated for patch 10.2.5.")
 end
 
 HR.SetAPL(73, APL, Init)

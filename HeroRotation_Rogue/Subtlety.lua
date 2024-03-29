@@ -42,9 +42,9 @@ local I = Item.Rogue.Subtlety
 
 -- Create table to exclude above trinkets from On Use function
 local OnUseExcludes = {
-  I.ManicGrieftorch:ID(),
-  I.BeaconToTheBeyond:ID(),
   I.Mirror:ID(),
+  I.WitherbarksBranch:ID(),
+  I.AshesoftheEmbersoul:ID(),
 }
 
 -- Rotation Var
@@ -127,11 +127,11 @@ end
 local function UsePriorityRotation()
   if MeleeEnemies10yCount < 2 then
     return false
-  elseif Settings.Commons.UsePriorityRotation == "Always" then
+  elseif Settings.Subtlety.UsePriorityRotation == "Always" then
     return true
-  elseif Settings.Commons.UsePriorityRotation == "On Bosses" and Target:IsInBossList() then
+  elseif Settings.Subtlety.UsePriorityRotation == "On Bosses" and Target:IsInBossList() then
     return true
-  elseif Settings.Commons.UsePriorityRotation == "Auto" then
+  elseif Settings.Subtlety.UsePriorityRotation == "Auto" then
     -- Zul Mythic
     if Player:InstanceDifficulty() == 16 and Target:NPCID() == 138967 then
       return true
@@ -547,7 +547,7 @@ local function CDs ()
   if HR.CDsON() and S.Sepsis:IsAvailable() and S.Sepsis:IsReady() then
     if SnD_Condition() and Target:FilteredTimeToDie(">=", 16)
       and (Player:BuffUp(S.PerforatedVeins) or not S.PerforatedVeins:IsAvailable()) then
-        if Cast(S.Sepsis, nil, Settings.Commons.CovenantDisplayStyle) then return "Cast Sepsis" end
+        if Cast(S.Sepsis, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Sepsis" end
     end
   end
 
@@ -561,7 +561,7 @@ local function CDs ()
       and (Trinket_Condition() and S.ShadowBlades:CooldownRemains() <= 3 or HL.BossFilteredFightRemains("<=", 28) or S.ShadowBlades:CooldownRemains() >= 14
       and S.InvigoratingShadowdust:IsAvailable() and S.ShadowDance:IsAvailable()) and (not S.InvigoratingShadowdust:IsAvailable() or S.Sepsis:IsAvailable() or not S.ShadowDance:IsAvailable()
       or S.InvigoratingShadowdust:TalentRank() == 2 and MeleeEnemies10yCount >= 2 or S.SymbolsofDeath:CooldownRemains() <= 3 or Player:BuffRemains(S.SymbolsofDeath) > 3) then
-        if Cast(S.Flagellation, nil, Settings.Commons.CovenantDisplayStyle) then return "Cast Flagellation" end
+        if Cast(S.Flagellation, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Flagellation" end
     end
   end
 
@@ -591,7 +591,7 @@ local function CDs ()
   -- ER during Shadow Dance.
   if HR.CDsON() and S.EchoingReprimand:IsCastable() and S.EchoingReprimand:IsAvailable() then
     if SnD_Condition() and ComboPointsDeficit >= 3 then
-      if Cast(S.EchoingReprimand, nil, Settings.Commons.CovenantDisplayStyle) then return "Cast Echoing Reprimand" end
+      if Cast(S.EchoingReprimand, nil, Settings.Commons.DisplayStyle.Signature) then return "Cast Echoing Reprimand" end
     end
   end
 
@@ -682,7 +682,7 @@ local function CDs ()
   -- Sync specific trinkets to Flagellation or Shadow Dance.
   if Settings.Commons.Enabled.Trinkets then
     if I.AshesoftheEmbersoul:IsEquippedAndReady() then
-      if Player:BuffUp(S.Flagellation) and S.InvigoratingShadowdust or Player:BuffUp(S.ShadowDance) and not I.WitherbarksBranch:IsEquipped() then
+      if Player:BuffUp(S.Flagellation) and (S.InvigoratingShadowdust:IsAvailable() or Player:BuffUp(S.ShadowDance)) and not I.WitherbarksBranch:IsEquippedAndReady() then
         if Cast(I.AshesoftheEmbersoul, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Ashes of the Embersoul" end
       end
     end
@@ -692,7 +692,7 @@ local function CDs ()
   -- |buff.shadow_blades.up|equipped.bandolier_of_twisted_blades&raid_event.adds.up
   if Settings.Commons.Enabled.Trinkets then
     if I.WitherbarksBranch:IsEquippedAndReady() then
-      if Player:BuffUp(S.Flagellation) and S.InvigoratingShadowdust:IsAvailable() or Player:BuffUp(S.ShadowBlades) or I.BandolierOfTwistedBlades:IsEquipped() then
+      if Player:BuffUp(S.Flagellation) and (S.InvigoratingShadowdust:IsAvailable() or Player:BuffUp(S.ShadowBlades) or I.BandolierOfTwistedBlades:IsEquippedAndReady()) then
         if Cast(I.WitherbarksBranch, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Witherbark's Branch" end
       end
     end
@@ -707,30 +707,12 @@ local function CDs ()
     end
   end
 
-  -- actions.cds+=/use_item,name=beacon_to_the_beyond,use_off_gcd=1,if=!stealthed.all&(buff.deeper_daggers.up
-  -- |!talent.deeper_daggers)&(!raid_event.adds.up|!equipped.stormeaters_boon|trinket.stormeaters_boon.cooldown.remains>20)
-  if Settings.Commons.Enabled.Trinkets then
-    if I.BeaconToTheBeyond:IsEquippedAndReady() then
-      if not Player:StealthUp(true, true) and (Player:BuffUp(S.DeeperDaggers) or not S.DeeperDaggers:IsAvailable())
-        and (not I.StormEatersBoon:IsEquipped() or I.StormEatersBoon:CooldownRemains() > 20) then
-          if Cast(I.BeaconToTheBeyond, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Beacon To The Beyond" end
-      end
-    end
-  end
-
-  -- actions.cds+=/use_item,name=manic_grieftorch,use_off_gcd=1,if=!stealthed.all&(!raid_event.adds.up
-  -- |!equipped.stormeaters_boon|trinket.stormeaters_boon.cooldown.remains>20)
-  if Settings.Commons.Enabled.Trinkets then
-    if I.ManicGrieftorch:IsEquippedAndReady() then
-      if Player:StealthUp(true, true) and (not I.StormEatersBoon:IsEquipped() or I.StormEatersBoon:CooldownRemains() > 20) then
-        if Cast(I.ManicGrieftorch, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Manic Grieftorch" end
-      end
-    end
-  end
-
-  -- actions.cds+=/use_items,if=!stealthed.all&(!trinket.mirror_of_fractured_tomorrows.cooldown.ready|!equipped.mirror_of_fractured_tomorrows)|fight_remains<10
+  -- actions.cds+=/use_items,if=!stealthed.all&(!trinket.mirror_of_fractured_tomorrows.cooldown.ready|!equipped.mirror_of_fractured_tomorrows)&(!trinket.ashes_of_the_embersoul.cooldown.ready|!equipped.ashes_of_the_embersoul)|fight_remains<10
   -- Default fallback for usable items: Use outside of Stealth/Shadow Dance.
-  if not Player:StealthUp(true, true) or (not I.Mirror:IsReady() or not I.Mirror:IsEquipped()) or HL.BossFilteredFightRemains("<", 10) then
+  if not Player:StealthUp(true, true) and (
+    (not I.Mirror:IsReady() or not I.Mirror:IsEquipped()) and
+      (not I.AshesoftheEmbersoul:IsReady() or not I.AshesoftheEmbersoul:IsEquipped()) or
+        HL.BossFilteredFightRemains("<", 10)) then
     local TrinketToUse = Player:GetUseableItems(OnUseExcludes)
     if TrinketToUse then
       if Cast(TrinketToUse, nil, Settings.Commons.DisplayStyle.Trinkets) then
@@ -739,17 +721,17 @@ local function CDs ()
     end
   end
 
-
-    -- actions.cds+=/thistle_tea,if=(cooldown.symbols_of_death.remains>=3|buff.symbols_of_death.up)&!buff.thistle_tea.up&(energy.deficit>=100&(combo_points.deficit>=2|spell_targets.shuriken_storm>=3)|cooldown.thistle_tea.charges_fractional>=2.75&buff.shadow_dance.up)|buff.shadow_dance.remains>=4&!buff.thistle_tea.up&spell_targets.shuriken_storm>=3|!buff.thistle_tea.up&fight_remains<=(6*cooldown.thistle_tea.charges)
-    if S.ThistleTea:IsReady() then
-      if (S.SymbolsofDeath:CooldownRemains() >= 3 or Player:BuffUp(S.SymbolsofDeath)) and not Player:BuffUp(S.ThistleTea)
-        and (Player:EnergyDeficitPredicted() >= 100 and (Player:ComboPointsDeficit() >= 2 or MeleeEnemies10yCount >= 3)
-          or S.ThistleTea:ChargesFractional() >= 2.75 and Player:BuffUp(S.ShadowDanceBuff))
-        or Player:BuffRemains(S.ShadowDanceBuff) >= 4 and not Player:BuffUp(S.ThistleTea) and MeleeEnemies10yCount >= 3
-        or not Player:BuffUp(S.ThistleTea) and HL.BossFilteredFightRemains("<=", 6 * S.ThistleTea:Charges()) then
-        if Cast(S.ThistleTea, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Thistle Tea"; end
-      end
+  -- actions.cds+=/thistle_tea,if=(cooldown.symbols_of_death.remains>=3|buff.symbols_of_death.up)&!buff.thistle_tea.up&(energy.deficit>=100&(combo_points.deficit>=2|spell_targets.shuriken_storm>=3)|cooldown.thistle_tea.charges_fractional>=2.75&buff.shadow_dance.up)|buff.shadow_dance.remains>=4&!buff.thistle_tea.up&spell_targets.shuriken_storm>=3|!buff.thistle_tea.up&fight_remains<=(6*cooldown.thistle_tea.charges)
+  if S.ThistleTea:IsReady() then
+    if (S.SymbolsofDeath:CooldownRemains() >= 3 or Player:BuffUp(S.SymbolsofDeath)) and not Player:BuffUp(S.ThistleTea)
+      and (Player:EnergyDeficitPredicted() >= 100 and (Player:ComboPointsDeficit() >= 2 or MeleeEnemies10yCount >= 3)
+        or S.ThistleTea:ChargesFractional() >= 2.75 and Player:BuffUp(S.ShadowDanceBuff))
+      or Player:BuffRemains(S.ShadowDanceBuff) >= 4 and not Player:BuffUp(S.ThistleTea) and MeleeEnemies10yCount >= 3
+      or not Player:BuffUp(S.ThistleTea) and HL.BossFilteredFightRemains("<=", 6 * S.ThistleTea:Charges()) then
+      if Cast(S.ThistleTea, nil, Settings.Commons.DisplayStyle.Trinkets) then return "Thistle Tea"; end
     end
+  end
+
   return false
 end
 
@@ -928,7 +910,7 @@ local function APL ()
 
   if Everyone.TargetIsValid() then
     -- Interrupts
-    ShouldReturn = Everyone.Interrupt(5, S.Kick, true, Interrupts)
+    ShouldReturn = Everyone.Interrupt(S.Kick, true, Interrupts)
     if ShouldReturn then return ShouldReturn end
 
     -- # Check CDs at first
@@ -1000,6 +982,9 @@ local function APL ()
       if ShouldReturn then return "Finish: " .. ShouldReturn end
     end
 
+    -- Set Finisher as pooling ability before the builders are checked
+    if PoolingFinisher then SetPoolingAbility(PoolingFinisher) end
+
     -- actions+=/call_action_list,name=build,if=energy.deficit<=variable.stealth_threshold
       ShouldReturn = Build(StealthEnergyRequired)
       if ShouldReturn then return "Build: " .. ShouldReturn end
@@ -1025,7 +1010,6 @@ local function APL ()
     end
 
     -- Show what ever was first stored for pooling
-    if PoolingFinisher then SetPoolingAbility(PoolingFinisher) end
     if PoolingAbility and TargetInMeleeRange then
       if type(PoolingAbility) == "table" and #PoolingAbility > 1 then
         if CastQueuePooling(Player:EnergyTimeToX(PoolingEnergy), unpack(PoolingAbility)) then return "Macro pool towards ".. PoolingAbility[1]:Name() .. " at " .. PoolingEnergy end
@@ -1044,7 +1028,7 @@ local function APL ()
 end
 
 local function Init ()
-  HR.Print("Subtlety Rogue rotation has NOT been updated for patch 10.2.0. It is unlikely to work properly at this time.")
+  HR.Print("Subtlety Rogue rotation has been updated for patch 10.2.5.")
 end
 
 HR.SetAPL(261, APL, Init)

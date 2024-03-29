@@ -486,7 +486,7 @@ local function APL()
     if EagleUp and not Target:IsInMeleeRange(8) then
       EnemyCount8ySplash = Target:GetEnemiesInSplashRangeCount(8)
     else
-      EnemyCount8ySplash = #Player:GetEnemiesInRange(8) > 0 and #Player:GetEnemiesInRange(8) or 1
+      EnemyCount8ySplash = #Player:GetEnemiesInRange(8)
     end
   else
     EnemyCount8ySplash = 1
@@ -530,7 +530,7 @@ local function APL()
       if Cast(S.Exhilaration, Settings.Commons2.GCDasOffGCD.Exhilaration) then return "Exhilaration"; end
     end
     -- muzzle
-    local ShouldReturn = Everyone.Interrupt(5, S.Muzzle, Settings.Survival.OffGCDasOffGCD.Muzzle, StunInterrupts); if ShouldReturn then return ShouldReturn; end
+    local ShouldReturn = Everyone.Interrupt(S.Muzzle, Settings.Survival.OffGCDasOffGCD.Muzzle, StunInterrupts); if ShouldReturn then return ShouldReturn; end
     -- auto_attack
     -- invoke_external_buff,name=power_infusion,if=buff.coordinated_assault.up|buff.spearhead.up|!talent.coordinated_assault&!talent.spearhead
     -- Note: Not handling external buffs.
@@ -565,7 +565,7 @@ local function APL()
 end
 
 local function OnInit ()
-  HR.Print("Survival Hunter rotation has been updated for patch 10.2.0.")
+  HR.Print("Survival Hunter rotation has been updated for patch 10.2.5.")
 end
 
 HR.SetAPL(255, APL, OnInit)

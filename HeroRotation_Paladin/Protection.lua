@@ -83,8 +83,8 @@ local function Precombat()
   if S.Consecration:IsCastable() and Target:IsInMeleeRange(8) then
     if Cast(S.Consecration) then return "consecration precombat 8"; end
   end
-  -- variable,name=trinket_sync_slot,value=1,if=trinket.1.has_stat.any_dps&(!trinket.2.has_stat.any_dps|trinket.1.cooldown.duration>=trinket.2.cooldown.duration)
-  -- variable,name=trinket_sync_slot,value=2,if=trinket.2.has_stat.any_dps&(!trinket.1.has_stat.any_dps|trinket.2.cooldown.duration>trinket.1.cooldown.duration)
+  -- variable,name=trinket_sync_slot,value=1,if=trinket.1.has_cooldown&trinket.1.has_stat.any_dps&(!trinket.2.has_stat.any_dps|trinket.1.cooldown.duration>=trinket.2.cooldown.duration)|!trinket.2.has_cooldown
+  -- variable,name=trinket_sync_slot,value=2,if=trinket.2.has_cooldown&trinket.2.has_stat.any_dps&(!trinket.1.has_stat.any_dps|trinket.2.cooldown.duration>trinket.1.cooldown.duration)|!trinket.1.has_cooldown
   -- Note: Unable to handle these trinket conditionals.
   -- Manually added: avengers_shield
   if S.AvengersShield:IsCastable() then
@@ -277,7 +277,7 @@ local function APL()
   Enemies8y = Player:GetEnemiesInMeleeRange(8)
   Enemies30y = Player:GetEnemiesInRange(30)
   if (AoEON()) then
-    EnemiesCount8y = #Enemies8y > 0 and #Enemies8y or 1
+    EnemiesCount8y = #Enemies8y
     EnemiesCount30y = #Enemies30y
   else
     EnemiesCount8y = 1
@@ -303,7 +303,7 @@ local function APL()
     end
     -- auto_attack
     -- Interrupts
-    local ShouldReturn = Everyone.Interrupt(5, S.Rebuke, Settings.Commons.OffGCDasOffGCD.Rebuke, StunInterrupts); if ShouldReturn then return ShouldReturn; end
+    local ShouldReturn = Everyone.Interrupt(S.Rebuke, Settings.Commons.OffGCDasOffGCD.Rebuke, StunInterrupts); if ShouldReturn then return ShouldReturn; end
     -- Manually added: Defensives!
     if IsTanking then
       local ShouldReturn = Defensives(); if ShouldReturn then return ShouldReturn; end
@@ -324,7 +324,7 @@ local function APL()
 end
 
 local function Init()
-  HR.Print("Protection Paladin rotation has been updated for patch 10.2.0.")
+  HR.Print("Protection Paladin rotation has been updated for patch 10.2.5.")
 end
 
 HR.SetAPL(66, APL, Init)

@@ -850,7 +850,7 @@ local function APL ()
 
   if Everyone.TargetIsValid() then
     -- Interrupts
-    ShouldReturn = Everyone.Interrupt(5, S.Kick, true, Interrupts)
+    ShouldReturn = Everyone.Interrupt(S.Kick, true, Interrupts)
     if ShouldReturn then return ShouldReturn end
   
     PoisonedBleeds = Rogue.PoisonedBleeds()
@@ -932,7 +932,7 @@ local function Init ()
   S.Sepsis:RegisterAuraTracking()
   S.Garrote:RegisterAuraTracking()
 
-  HR.Print("Assassination Rogue rotation has been updated for patch 10.2.0.")
+  HR.Print("Assassination Rogue rotation has been updated for patch 10.2.5.")
 end
 
 HR.SetAPL(259, APL, Init)

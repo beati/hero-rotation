@@ -42,10 +42,8 @@ HR.GUISettings.APL.Druid = {
     }
   },
   Balance = {
-    BarkskinHP = 50,
-    RenewalHP = 40,
+    ShowCancelStarlord = false,
     ShowMoonkinFormOOC = false,
-    DelayBerserking = false,
     PotionType = {
       Selected = "Power",
     },
@@ -66,16 +64,18 @@ HR.GUISettings.APL.Druid = {
     }
   },
   Feral = {
+    Align2Min = false,
     ShowCatFormOOC = false,
     ShowHealSpells = false,
     UseEasySwipe = false,
     UseZerkBiteweave = false,
-    Align2Min = false,
     PotionType = {
       Selected = "Power",
     },
     GCDasOffGCD = {
       BsInc = true,
+      FeralFrenzy = false,
+      HeartOfTheWild = true,
       Regrowth = true,
       Renewal = true,
     },
@@ -86,15 +86,15 @@ HR.GUISettings.APL.Druid = {
     }
   },
   Guardian = {
-    UseIronfurOffensively = true,
-    UseRageDefensively = true,
+    BarkskinHP = 50,
+    BristlingFurRage = 50,
     DoCRegrowthNoPoPHP = 30,
     DoCRegrowthWithPoPHP = 45,
-    RenewalHP = 60,
-    BarkskinHP = 50,
     FrenziedRegenHP = 70,
+    RenewalHP = 60,
     SurvivalInstinctsHP = 30,
-    BristlingFurRage = 50,
+    UseIronfurOffensively = true,
+    UseRageDefensively = true,
     PotionType = {
       Selected = "Power",
     },
@@ -136,7 +136,8 @@ local CP_Restoration = CreateChildPanel(CP_Druid, "Restoration")
 CreateARPanelOptions(CP_Druid, "APL.Druid.Commons")
 
 -- Balance
-CreatePanelOption("CheckButton", CP_Balance, "APL.Druid.Balance.ShowMoonkinFormOOC", "Show Moonkin Form Out of Combat", "Enable this if you want the addon to show you the Moonkin Form reminder out of combat.")
+CreatePanelOption("CheckButton", CP_Balance, "APL.Druid.Balance.ShowMoonkinFormOOC", "Show Moonkin Form Out of Combat", "Enable this option if you want the addon to show you the Moonkin Form reminder out of combat.")
+CreatePanelOption("CheckButton", CP_Balance, "APL.Druid.Balance.ShowCancelStarlord", "Show Starlord Cancel Suggestions", "Enable this option if you want to see suggestions to cancel Starlord. Note: This is a very minor dps gain if done correctly, but can be a dps loss if done incorrectly.")
 CreateARPanelOptions(CP_Balance, "APL.Druid.Balance")
 
 -- Feral

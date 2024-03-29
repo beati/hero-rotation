@@ -148,11 +148,13 @@ local function Precombat()
   -- snapshot_stats
   -- variable,name=If_build,value=1,value_else=0,if=talent.thorns_of_iron.enabled&talent.reinforced_fur.enabled
   -- Note: Moved to variable declarations and PLAYER_TALENT_UPDATE registration
-  -- cat_form,if=(druid.catweave_bear=1&(cooldown.pause_action.remains|time>30))
-  -- moonkin_form,if=(!druid.catweave_bear=1)&(cooldown.pause_action.remains|time>30)
+  -- variable,name=catweave_bear,op=reset
+  -- variable,name=owlweave_bear,op=reset
+  -- cat_form,if=(variable.catweave_bear&(cooldown.pause_action.remains|time>30))
+  -- moonkin_form,if=(!variable.catweave_bear)&(cooldown.pause_action.remains|time>30)
   -- heart_of_the_wild,if=talent.heart_of_the_wild.enabled
-  -- prowl,if=druid.catweave_bear=1&(cooldown.pause_action.remains|time>30)
-  -- NOTE: Not handling cat-weaving or owl-weaving, so skipping above 4 lines
+  -- prowl,if=variable.catweave_bear&(cooldown.pause_action.remains|time>30)
+  -- NOTE: Not handling cat-weaving or owl-weaving, so skipping above 6 lines
   -- Manually added: Group buff check
   if S.MarkoftheWild:IsCastable() and Everyone.GroupBuffMissing(S.MarkoftheWildBuff) then
     if Cast(S.MarkoftheWild, Settings.Commons.GCDasOffGCD.MarkOfTheWild) then return "mark_of_the_wild precombat 2"; end
@@ -251,7 +253,8 @@ local function Bear()
   end
   -- maul,if=(((buff.incarnation.up|buff.berserk_bear.up)&active_enemies<=5&!talent.raze.enabled&(buff.tooth_and_claw.stack>=1))&variable.If_build=0)&cooldown.rage_of_the_sleeper.remains>3|(((buff.incarnation.up|buff.berserk_bear.up)&active_enemies=1&talent.raze.enabled&(buff.tooth_and_claw.stack>=1))&variable.If_build=0)&cooldown.rage_of_the_sleeper.remains>3|(((buff.incarnation.up|buff.berserk_bear.up)&active_enemies<=5&!talent.raze.enabled&(buff.tooth_and_claw.stack>=1))&variable.If_build=0)&buff.rage_of_the_sleeper.up|(((buff.incarnation.up|buff.berserk_bear.up)&active_enemies=1&talent.raze.enabled&(buff.tooth_and_claw.stack>=1))&variable.If_build=0)&buff.rage_of_the_sleeper.up
   -- Note: Simplified the if statement to: (buff.incarnation.up|buff.berserk_bear.up)&buff.tooth_and_claw.stack>=1&variable.If_build=0&(active_enemies<=5&!talent.raze.enabled|active_enemies=1&talent.raze.enabled)&(buff.rage_of_the_sleeper.up|cooldown.rage_of_the_sleeper.remains>3)
-  if S.Maul:IsReady() and not VarIFBuild and UseMaul and ((Player:BuffUp(S.IncarnationBuff) or Player:BuffUp(S.BerserkBuff)) and Player:BuffStack(S.ToothandClawBuff) >= 1 and (MeleeEnemies11yCount <= 5 and not S.Raze:IsAvailable() or MeleeEnemies11yCount == 1 and S.Raze:IsAvailable()) and (Player:BuffUp(S.RageoftheSleeper) or S.RageoftheSleeper:CooldownRemains() > 3)) then
+  -- Note: Added 'not IsTanking' to RotS conditions, as RotS doesn't get used while not actively tanking.
+  if S.Maul:IsReady() and not VarIFBuild and UseMaul and ((Player:BuffUp(S.IncarnationBuff) or Player:BuffUp(S.BerserkBuff)) and Player:BuffStack(S.ToothandClawBuff) >= 1 and (MeleeEnemies11yCount <= 5 and not S.Raze:IsAvailable() or MeleeEnemies11yCount == 1 and S.Raze:IsAvailable()) and (Player:BuffUp(S.RageoftheSleeper) or S.RageoftheSleeper:CooldownRemains() > 3 or not IsTanking)) then
     if Cast(S.Maul, nil, nil, not IsInMeleeRange) then return "maul bear 28"; end
   end
   -- raze,if=(buff.incarnation.up|buff.berserk_bear.up)&(variable.If_build=0)&active_enemies>1&cooldown.rage_of_the_sleeper.remains>3|(buff.incarnation.up|buff.berserk_bear.up)&(variable.If_build=0)&active_enemies>1&buff.rage_of_the_sleeper.up
@@ -287,13 +290,15 @@ local function Bear()
   -- maul,if=(buff.tooth_and_claw.up&active_enemies<=5&!talent.raze.enabled)&cooldown.rage_of_the_sleeper.remains>3|(buff.tooth_and_claw.up&active_enemies=1&talent.raze.enabled)&cooldown.rage_of_the_sleeper.remains>3|(buff.tooth_and_claw.up&active_enemies<=5&!talent.raze.enabled)&buff.rage_of_the_sleeper.up|(buff.tooth_and_claw.up&active_enemies=1&talent.raze.enabled)&buff.rage_of_the_sleeper.up
   -- Note: Simplified the if statement to:
   -- buff.tooth_and_claw.up&(active_enemies<=5&!talent.raze|active_enemies=1&talent.raze)&(buff.rage_of_the_sleeper.up|cooldown.rage_of_the_sleeper.remains>3)
-  if S.Maul:IsReady() and (Player:BuffUp(S.ToothandClawBuff) and (MeleeEnemies11yCount <= 5 and not S.Raze:IsAvailable() or MeleeEnemies11yCount == 1 and S.Raze:IsAvailable()) and (Player:BuffUp(S.RageoftheSleeper) or S.RageoftheSleeper:CooldownRemains() > 3)) then
+  -- Note: Added 'not IsTanking' to RotS conditions, as RotS doesn't get used while not actively tanking.
+  if S.Maul:IsReady() and (Player:BuffUp(S.ToothandClawBuff) and (MeleeEnemies11yCount <= 5 and not S.Raze:IsAvailable() or MeleeEnemies11yCount == 1 and S.Raze:IsAvailable()) and (Player:BuffUp(S.RageoftheSleeper) or S.RageoftheSleeper:CooldownRemains() > 3 or not IsTanking)) then
     if Cast(S.Maul, nil, nil, not IsInMeleeRange) then return "maul bear 42"; end
   end
   -- maul,if=(active_enemies<=5&!talent.raze.enabled&variable.If_build=0)&cooldown.rage_of_the_sleeper.remains>3|(active_enemies=1&talent.raze.enabled&variable.If_build=0)&cooldown.rage_of_the_sleeper.remains>3|(active_enemies<=5&!talent.raze.enabled&variable.If_build=0)&buff.rage_of_the_sleeper.up|(active_enemies=1&talent.raze.enabled&variable.If_build=0)&buff.rage_of_the_sleeper.up
   -- Simplified the if statement to:
   -- variable.If_build=0&(active_enemies<=5&!talent.raze|active_enemies=1&talent.raze)&(buff.rage_of_the_sleeper.up|cooldown.rage_of_the_sleeper.remains>3)
-  if S.Maul:IsReady() and not VarIFBuild and ((MeleeEnemies11yCount <= 5 and not S.Raze:IsAvailable() or MeleeEnemies11yCount == 1 and S.Raze:IsAvailable()) and (Player:BuffUp(S.RageoftheSleeper) or S.RageoftheSleeper:CooldownRemains() > 3)) then
+  -- Note: Added 'not IsTanking' to RotS conditions, as RotS doesn't get used while not actively tanking.
+  if S.Maul:IsReady() and not VarIFBuild and ((MeleeEnemies11yCount <= 5 and not S.Raze:IsAvailable() or MeleeEnemies11yCount == 1 and S.Raze:IsAvailable()) and (Player:BuffUp(S.RageoftheSleeper) or S.RageoftheSleeper:CooldownRemains() > 3 or not IsTanking)) then
     if Cast(S.Maul, nil, nil, not IsInMeleeRange) then return "maul bear 44"; end
   end
   -- thrash_bear,target_if=active_enemies>=5
@@ -335,11 +340,10 @@ local function APL()
   local AIRange = mathfloor(1.5 * S.AstralInfluence:TalentRank())
   MeleeRange = 5 + AIRange
   AoERange = 8 + AIRange
+  MeleeEnemies11y = Player:GetEnemiesInMeleeRange(AoERange)
   if AoEON() then
-    MeleeEnemies11y = Player:GetEnemiesInMeleeRange(AoERange)
-    MeleeEnemies11yCount = #MeleeEnemies11y > 0 and #MeleeEnemies11y or 1
+    MeleeEnemies11yCount = #MeleeEnemies11y
   else
-    MeleeEnemies11y = {}
     MeleeEnemies11yCount = 1
   end
 
@@ -362,7 +366,7 @@ local function APL()
       local ShouldReturn = Precombat(); if ShouldReturn then return ShouldReturn; end
     end
     -- Interrupt
-    local ShouldReturn = Everyone.Interrupt(13, S.SkullBash, Settings.Guardian.OffGCDasOffGCD.SkullBash, false); if ShouldReturn then return ShouldReturn; end
+    local ShouldReturn = Everyone.Interrupt(S.SkullBash, Settings.Guardian.OffGCDasOffGCD.SkullBash, false); if ShouldReturn then return ShouldReturn; end
     -- Manually added: run_action_list,name=defensives
     if (IsTanking and Player:BuffUp(S.BearForm)) then
       local ShouldReturn = Defensives(); if ShouldReturn then return ShouldReturn; end
@@ -392,14 +396,14 @@ local function APL()
     if Settings.Commons.Enabled.Items and I.Djaruun:IsEquippedAndReady() and (Target:DebuffUp(S.MoonfireDebuff)) then
       if Cast(I.Djaruun, nil, Settings.Commons.DisplayStyle.Items, not Target:IsInRange(100)) then return "djaruun_pillar_of_the_elder_flame main 4"; end
     end
-    -- potion,if=((talent.heart_of_the_wild.enabled&buff.heart_of_the_wild.up)|((buff.berserk_bear.up|buff.incarnation_guardian_of_ursoc.up)&(!druid.catweave_bear&!druid.owlweave_bear)))
+    -- potion,if=((talent.heart_of_the_wild.enabled&buff.heart_of_the_wild.up)|((buff.berserk_bear.up|buff.incarnation_guardian_of_ursoc.up)&(!variable.catweave_bear&!variable.owlweave_bear)))
     if Settings.Commons.Enabled.Potions and ((S.HeartoftheWild:IsAvailable() and Player:BuffUp(S.HeartoftheWild)) or (Player:BuffUp(S.BerserkBuff) or Player:BuffUp(S.Incarnation))) then
       local PotionSelected = Everyone.PotionSelected()
       if PotionSelected and PotionSelected:IsReady() then
         if Cast(PotionSelected, nil, Settings.Commons.DisplayStyle.Potions) then return "potion main 6"; end
       end
     end
-    -- run_action_list,name=catweave,if=(target.cooldown.pause_action.remains|time>=30)&druid.catweave_bear=1&buff.tooth_and_claw.remains>1.5&(buff.incarnation_guardian_of_ursoc.down&buff.berserk_bear.down)&(cooldown.thrash_bear.remains>0&cooldown.mangle.remains>0&dot.moonfire.remains>=2)|(buff.cat_form.up&energy>25&druid.catweave_bear=1&buff.tooth_and_claw.remains>1.5)|(buff.heart_of_the_wild.up&energy>90&druid.catweave_bear=1&buff.tooth_and_claw.remains>1.5)
+    -- run_action_list,name=catweave,if=(target.cooldown.pause_action.remains|time>=30)&variable.catweave_bear&buff.tooth_and_claw.remains>1.5&(buff.incarnation_guardian_of_ursoc.down&buff.berserk_bear.down)&(cooldown.thrash_bear.remains>0&cooldown.mangle.remains>0&dot.moonfire.remains>=2)|(buff.cat_form.up&energy>25&variable.catweave_bear&buff.tooth_and_claw.remains>1.5)|(buff.heart_of_the_wild.up&energy>90&variable.catweave_bear&buff.tooth_and_claw.remains>1.5)
     -- run_action_list,name=owlweave,if=(target.cooldown.pause_action.remains|time>=30)&buff.tooth_and_claw.remains<1.5&((druid.owlweave_bear=1)&buff.incarnation_guardian_of_ursoc.down&buff.berserk_bear.down&cooldown.starsurge.up)
     -- Skipping the above lists, as we're not handling catweaving or owlweaving
     -- run_action_list,name=bear
@@ -410,7 +414,7 @@ local function APL()
 end
 
 local function OnInit()
-  HR.Print("Guardian Druid rotation has been updated for patch 10.2.0.")
+  HR.Print("Guardian Druid rotation has been updated for patch 10.2.5.")
 end
 
 HR.SetAPL(104, APL, OnInit)

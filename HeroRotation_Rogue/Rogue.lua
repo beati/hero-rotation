@@ -167,6 +167,7 @@ Spell.Rogue.Outlaw = MergeTableByKey(Spell.Rogue.Commons, {
   -- Abilities
   AdrenalineRush          = Spell(13750),
   Ambush                  = Spell(8676),
+  SSAudacity              = Spell(197834),
   AmbushOverride          = Spell(430023),
   BetweentheEyes          = Spell(315341),
   BladeFlurry             = Spell(13877),
@@ -197,6 +198,7 @@ Spell.Rogue.Outlaw = MergeTableByKey(Spell.Rogue.Commons, {
   PreyontheWeak           = Spell(131511),
   PreyontheWeakDebuff     = Spell(255909),
   QuickDraw               = Spell(196938),
+  Ruthlessness            = Spell(14161),
   SummarilyDispatched     = Spell(381990),
   SwiftSlasher            = Spell(381988),
   TakeEmBySurpriseBuff    = Spell(385907),
@@ -309,7 +311,7 @@ end
 -- Stealth
 function Commons.Stealth(Stealth, Setting)
   if (Settings.Commons2.ShowStealthOOC or Everyone.TargetIsValid()) and Stealth:IsCastable() and Player:StealthDown() then
-    if HR.Cast(Stealth) then return "Cast Stealth (OOC)" end
+    if HR.Cast(Stealth, nil, Settings.Commons.DisplayStyle.Stealth) then return "Cast Stealth (OOC)" end
   end
 
   return false
