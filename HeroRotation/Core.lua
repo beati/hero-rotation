@@ -1,25 +1,26 @@
 --- ============================ HEADER ============================
 --- ======= LOCALIZE =======
 -- Addon
-local addonName, HR = ...
+local addonName, HR    = ...
 -- HeroLib
-local HL           = HeroLib
-local Cache, Utils = HeroCache, HL.Utils
-local Unit         = HL.Unit
-local Player       = Unit.Player
-local Target       = Unit.Target
-local Spell        = HL.Spell
-local Item         = HL.Item
+local HL               = HeroLib
+local Cache, Utils     = HeroCache, HL.Utils
+local Unit             = HL.Unit
+local Player           = Unit.Player
+local Target           = Unit.Target
+local Spell            = HL.Spell
+local Item             = HL.Item
 -- Lua
-local mathmin      = math.min
-local print        = print
-local select       = select
-local stringlower  = string.lower
-local strsplit     = strsplit
-local tostring     = tostring
-local GetTime      = GetTime
+local mathmin          = math.min
+local print            = print
+local select           = select
+local stringlower      = string.lower
+local strsplit         = strsplit
+local tostring         = tostring
+local GetTime          = GetTime
 -- API locals
-local GetItemInfo  = C_Item.GetItemInfo
+local GetItemInfo      = C_Item.GetItemInfo
+local GetAddOnMetadata = C_AddOns.GetAddOnMetadata
 -- File Locals
 
 --- ======= GLOBALIZE =======
@@ -320,21 +321,31 @@ function HR.CmdHandler(Message)
   if Argument1 == "cds" then
     HeroRotationCharDB.Toggles[1] = not HeroRotationCharDB.Toggles[1]
     HR.ToggleIconFrame:UpdateButtonText(1)
-    HR.Print("CDs are now "..(HeroRotationCharDB.Toggles[1] and "|cff00ff00enabled|r." or "|cffff0000disabled|r."))
+    if not HR.GUISettings.General.SilentMode then
+      HR.Print("CDs are now "..(HeroRotationCharDB.Toggles[1] and "|cff00ff00enabled|r." or "|cffff0000disabled|r."))
+    end
   elseif Argument1 == "aoe" then
     HeroRotationCharDB.Toggles[2] = not HeroRotationCharDB.Toggles[2]
     HR.ToggleIconFrame:UpdateButtonText(2)
-    HR.Print("AoE is now "..(HeroRotationCharDB.Toggles[2] and "|cff00ff00enabled|r." or "|cffff0000disabled|r."))
+    if not HR.GUISettings.General.SilentMode then
+      HR.Print("AoE is now "..(HeroRotationCharDB.Toggles[2] and "|cff00ff00enabled|r." or "|cffff0000disabled|r."))
+    end
   elseif Argument1 == "toggle" then
     HeroRotationCharDB.Toggles[3] = not HeroRotationCharDB.Toggles[3]
     HR.ToggleIconFrame:UpdateButtonText(3)
-    HR.Print("HeroRotation is now "..(HeroRotationCharDB.Toggles[3] and "|cff00ff00enabled|r." or "|cffff0000disabled|r."))
+    if not HR.GUISettings.General.SilentMode then
+      HR.Print("HeroRotation is now "..(HeroRotationCharDB.Toggles[3] and "|cff00ff00enabled|r." or "|cffff0000disabled|r."))
+    end
   elseif Argument1 == "unlock" then
     HR.MainFrame:Unlock()
-    HR.Print("HeroRotation UI is now |cff00ff00unlocked|r.")
+    if not HR.GUISettings.General.SilentMode then
+      HR.Print("HeroRotation UI is now |cff00ff00unlocked|r.")
+    end
   elseif Argument1 == "lock" then
     HR.MainFrame:Lock()
-    HR.Print("HeroRotation UI is now |cffff0000locked|r.")
+    if not HR.GUISettings.General.SilentMode then
+      HR.Print("HeroRotation UI is now |cffff0000locked|r.")
+    end
   elseif Argument1 == "scale" then
     if Argument2 and Argument3 then
       Argument3 = tonumber(Argument3)
@@ -369,7 +380,14 @@ function HR.CmdHandler(Message)
     HR.Print("Debug Output is now " .. (HeroRotationCharDB.Toggles[4] == true and "|cff00ff00enabled|r." or "|cffff0000disabled|r."))
   elseif Argument1 == "flash" then
     HeroRotationCharDB.Toggles[5] = not HeroRotationCharDB.Toggles[5]
-    HR.Print("Icon Flashing is now " .. (HeroRotationCharDB.Toggles[5] == true and "|cff00ff00enabled|r." or "|cffff0000disabled|r."))
+    if not HR.GUISettings.General.SilentMode then
+      HR.Print("Icon Flashing is now " .. (HeroRotationCharDB.Toggles[5] == true and "|cff00ff00enabled|r." or "|cffff0000disabled|r."))
+    end
+  elseif Argument1 == "version" then
+    local HRVer, HLVer, DBCVer = HR.Version()
+    HR.Print("HeroRotation Version: |cff8888ff" .. tostring(HRVer) .. "|r")
+    HR.Print("HeroLib Version: |cff8888ff" .. tostring(HLVer) .. "|r")
+    HR.Print("HeroDBC Version: |cff8888ff" .. tostring(DBCVer) .. "|r")
   elseif Argument1 == "help" then
     HR.Print("|cffffff00--[Toggles]--|r")
     HR.Print("  On/Off: |cff8888ff/hr toggle|r")
@@ -377,6 +395,7 @@ function HR.CmdHandler(Message)
     HR.Print("  AoE: |cff8888ff/hr aoe|r")
     HR.Print("  Debug: |cff8888ff/hr debug|r")
     HR.Print("  Flash: |cff8888ff/hr flash|r")
+    HR.Print("Version: |cff8888ff/hr version|r")
     HR.Print("|cffffff00--[User Interface]--|r")
     HR.Print("  UI Lock: |cff8888ff/hr lock|r")
     HR.Print("  UI Unlock: |cff8888ff/hr unlock|r")
@@ -431,4 +450,12 @@ end
 -- Get if the UI is locked.
 function HR.Locked()
   return HeroRotationDB.Locked
+end
+
+-- Get the version of HR.
+function HR.Version()
+  local HRVer = GetAddOnMetadata("HeroRotation", "Version") or "not defined"
+  local HLVer = GetAddOnMetadata("HeroLib", "Version") or "not defined"
+  local DBCVer = GetAddOnMetadata("HeroDBC", "Version") or "not defined"
+  return HRVer, HLVer, DBCVer
 end
