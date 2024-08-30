@@ -167,6 +167,47 @@ local function Defensives()
   end
 end
 
+
+local function SimplifiedAPL()
+  -- Vars to calculate Fracture Fury gain
+  local VarFractureFuryInMeta = 45
+  local VarFractureFuryNotInMeta = 25
+  local VarFractureFuryGain = 0
+  if Player:BuffUp(S.MetamorphosisBuff) then
+    VarFractureFuryGain = VarFractureFuryInMeta
+  else
+    VarFractureFuryGain = VarFractureFuryNotInMeta
+  end
+
+  if S.SpiritBomb:IsReady() and ((EnemiesCount8yMelee == 1 and SoulFragments >= 5 and false) or (EnemiesCount8yMelee > 1 and (SoulFragments >= 4 or SoulFragments >=3 and Player:BuffUp(S.MetamorphosisBuff)))) then
+    if Cast(S.SpiritBomb, nil, nil, not Target:IsInMeleeRange(8)) then return "spirit_bomb simplified 18 Enemy: " .. EnemiesCount8yMelee .. "Souls: " .. SoulFragments; end
+  end
+  if S.SpiritBurst:IsReady() and ((EnemiesCount8yMelee == 1 and SoulFragments >= 5 and false) or (EnemiesCount8yMelee > 1 and (SoulFragments >= 4 or SoulFragments >=3 and Player:BuffUp(S.MetamorphosisBuff)))) then
+    if Cast(S.SpiritBurst, nil, nil, not Target:IsInMeleeRange(8)) then return "spirit_burst simplified 18 Enemy: " .. EnemiesCount8yMelee .. "Souls: " .. SoulFragments; end
+  end
+
+  if S.SigilofFlame:IsCastable() and Target:DebuffRefreshable(S.SigilofFlameDebuff) then
+    if Cast(S.SigilofFlame, nil, nil, not Target:IsInRange(30)) then return "sigil_of_flame simplified 28 (Normal)"; end
+  end
+
+  if S.ImmolationAura:IsCastable() then
+    if Cast(S.ImmolationAura) then return "immolation_aura simplified 22"; end
+  end
+
+  if S.Fracture:IsCastable() and ((EnemiesCount8yMelee == 1 and Player:FuryDeficit() >= VarFractureFuryGain) or (EnemiesCount8yMelee > 1 and (SoulFragments <= 2 or SoulFragments <= 3 and not Player:BuffUp(S.MetamorphosisBuff) or SoulFragments > 0 and Player:Fury() < 40))) then
+    if Cast(S.Fracture, nil, nil, not IsInMeleeRange) then return "fracture simplified 26"; end
+  end
+
+  if S.SoulCleave:IsReady() and (EnemiesCount8yMelee == 1 or SoulFragments == 0) then
+    if Cast(S.SoulCleave, nil, nil, not Target:IsSpellInRange(S.SoulCleave)) then return "soul_cleave simplified 20"; end
+  end
+  if S.SoulSunder:IsReady() and (EnemiesCount8yMelee == 1 or SoulFragments == 0) then
+    if Cast(S.SoulSunder, nil, nil, not Target:IsSpellInRange(S.SoulSunder)) then return "soul_sunder simplified 20"; end
+  end
+
+  if CastAnnotated(S.Pool, false, "WAIT") then return "Wait/Pool Resources simplified"; end
+end
+
 -- Note: Included because it's in the APL, but we don't handle externals.
 --[[local function Externals()
   -- invoke_external_buff,name=symbol_of_hope
@@ -730,6 +771,11 @@ local function FS()
       end
     end
   end
+
+  if (Settings.Vengeance.UseSimplifiedRotation) then
+    return SimplifiedAPL()
+  end
+
   -- cancel_buff,name=metamorphosis,if=(!buff.demonsurge_soul_sunder.up&!buff.demonsurge_spirit_burst.up&!buff.demonsurge_fel_desolation.up&!buff.demonsurge_consuming_fire.up&!buff.demonsurge_sigil_of_doom.up&cooldown.sigil_of_doom.charges<1&!prev_gcd.1.sigil_of_doom)&(cooldown.fel_devastation.remains<(gcd.max*2)|cooldown.metamorphosis.remains<(gcd.max*2))
   -- TODO: Handle cancel_buff.
   -- immolation_aura,if=!(talent.illuminated_sigils&cooldown.metamorphosis.up&cooldown.sigil_of_flame.charges_fractional>=1&!prev_gcd.1.sigil_of_flame)
@@ -919,9 +965,9 @@ local function APL()
       local ShouldReturn = Defensives(); if ShouldReturn then return ShouldReturn; end
     end
     -- infernal_strike,use_off_gcd=1
-    if S.InfernalStrike:IsCastable() and (not Settings.Vengeance.ConserveInfernalStrike or S.InfernalStrike:ChargesFractional() > 1.9) and (S.InfernalStrike:TimeSinceLastCast() > 2) then
-      if Cast(S.InfernalStrike, Settings.Vengeance.OffGCDasOffGCD.InfernalStrike, nil, not Target:IsInRange(30)) then return "infernal_strike main 2"; end
-    end
+    --if S.InfernalStrike:IsCastable() and (not Settings.Vengeance.ConserveInfernalStrike or S.InfernalStrike:ChargesFractional() > 1.9) and (S.InfernalStrike:TimeSinceLastCast() > 2) then
+      --if Cast(S.InfernalStrike, Settings.Vengeance.OffGCDasOffGCD.InfernalStrike, nil, not Target:IsInRange(30)) then return "infernal_strike main 2"; end
+    --end
     -- demon_spikes,use_off_gcd=1,if=!buff.demon_spikes.up&!cooldown.pause_action.remains
     -- Note: Handled via Defensives()
     -- run_action_list,name=ar,if=hero_tree.aldrachi_reaver
