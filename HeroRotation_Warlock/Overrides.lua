@@ -93,6 +93,18 @@ AffOldSpellIsReady = HL.AddCoreOverride ("Spell.IsReady",
   end
 , 265)
 
+local AffOldSpellIsAvailable
+AffOldSpellIsAvailable = HL.AddCoreOverride ("Spell.IsAvailable",
+  function (self, CheckPet)
+    local BaseCheck = AffOldSpellIsAvailable(self, CheckPet)
+    if self == SpellAffli.Wither then
+      return self:IsLearned()
+    else
+      return BaseCheck
+    end
+  end
+, 265)
+
 local AffOldBuffUp
 AffOldBuffUp = HL.AddCoreOverride ("Player.BuffUp",
   function (self, Spell, AnyCaster, BypassRecovery)
@@ -116,6 +128,22 @@ AffOldBuffRemains = HL.AddCoreOverride ("Player.BuffRemains",
       local SoulRotBuffLength = 8
       local Remains = SoulRotBuffLength - (GetTime() - Warlock.SoulRotAppliedTime)
       return (Remains > 0) and Remains or 0
+    else
+      return BaseCheck
+    end
+  end
+, 265)
+
+local AffOldDebuffUp
+AffOldDebuffUp = HL.AddCoreOverride ("Target.DebuffUp",
+  function (self, Spell, AnyCaster, BypassRecovery)
+    local BaseCheck = AffOldDebuffUp(self, Spell, AnyCaster, BypassRecovery)
+    if Spell == SpellAffli.UnstableAfflictionDebuff then
+      return BaseCheck or Player:IsCasting(SpellAffli.UnstableAffliction)
+    elseif Spell == SpellAffli.HauntDebuff then
+      return BaseCheck or Player:IsCasting(SpellAffli.Haunt)
+    elseif Spell == SpellAffli.VileTaintDebuff then
+      return BaseCheck or Player:IsCasting(SpellAffli.VileTaint)
     else
       return BaseCheck
     end
