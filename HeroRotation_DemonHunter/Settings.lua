@@ -51,7 +51,7 @@ HR.GUISettings.APL.DemonHunter = {
     BlurHealthThreshold = 65,
     ConserveFelRush = false,
     PotionType = {
-      Selected = "Power",
+      Selected = "Tempered",
     },
     -- {Display OffGCD as OffGCD, ForceReturn}
     OffGCDasOffGCD = {
@@ -76,7 +76,7 @@ HR.GUISettings.APL.DemonHunter = {
     MetamorphosisHealthThreshold = 50,
     UseSimplifiedRotation = false,
     PotionType = {
-      Selected = "Power",
+      Selected = "Tempered",
     },
     DisplayStyle = {
       DemonSpikes = "SuggestedRight",
