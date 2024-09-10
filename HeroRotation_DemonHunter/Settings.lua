@@ -50,6 +50,7 @@ HR.GUISettings.APL.DemonHunter = {
   Havoc = {
     BlurHealthThreshold = 65,
     ConserveFelRush = false,
+    UseSimplifiedRotation = false,
     PotionType = {
       Selected = "Tempered",
     },
@@ -120,4 +121,5 @@ CreateARPanelOptions(CP_Vengeance, "APL.DemonHunter.Vengeance")
 -- Havoc
 CreatePanelOption("CheckButton", CP_Havoc, "APL.DemonHunter.Havoc.ConserveFelRush", "Conserve Fel Rush", "Save at least 1 Fel Rush charge for mobility.")
 CreatePanelOption("Slider", CP_Havoc, "APL.DemonHunter.Havoc.BlurHealthThreshold", {5, 100, 5}, "Blur Health Threshold", "Suggest Blur when below this health percentage.")
+CreatePanelOption("CheckButton", CP_Havoc, "APL.DemonHunter.Havoc.UseSimplifiedRotation", "Use Simplified Rotation", "Check this to use a simplified rotation.")
 CreateARPanelOptions(CP_Havoc, "APL.DemonHunter.Havoc")

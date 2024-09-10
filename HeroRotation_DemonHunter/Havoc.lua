@@ -162,6 +162,81 @@ local function Precombat()
   end
 end
 
+local function SimplifiedAPL()
+  if Settings.Commons.Enabled.Trinkets then
+    local Trinket1ToUse, _, Trinket1Range = Player:GetUseableItems(OnUseExcludes, 13)
+    -- use_item,slot=trinket1,use_off_gcd=1,if=((cooldown.eye_beam.remains<gcd.max&active_enemies>1|buff.metamorphosis.up)&(raid_event.adds.in>trinket.1.cooldown.duration-15|raid_event.adds.remains>8)|!trinket.1.has_buff.any|fight_remains<25)&(!equipped.witherbarks_branch|trinket.2.cooldown.remains>20)&time>0
+    -- Note: Added check for Trinket2:Cooldown() == 0, as otherwise a non-on-use trinket in slot 2 causes this to never be suggested.
+    if Trinket1ToUse and (((S.EyeBeam:CooldownRemains() < GCDMax and Enemies8yCount > 1 or Player:BuffUp(S.MetamorphosisBuff)) or not Trinket1:HasUseBuff() or BossFightRemains < 25) and (not I.WitherbarksBranch:IsEquipped() or Trinket2:CooldownRemains() > 20 or Trinket2:Cooldown() == 0)) then
+      if Cast(Trinket1ToUse, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(Trinket1Range)) then return "trinket1"; end
+    end
+    local Trinket2ToUse, _, Trinket2Range = Player:GetUseableItems(OnUseExcludes, 14)
+    -- use_item,slot=trinket2,use_off_gcd=1,if=((cooldown.eye_beam.remains<gcd.max&active_enemies>1|buff.metamorphosis.up)&(raid_event.adds.in>trinket.2.cooldown.duration-15|raid_event.adds.remains>8)|!trinket.2.has_buff.any|fight_remains<25)&(!equipped.witherbarks_branch|trinket.1.cooldown.remains>20)&time>0
+    -- Note: Added check for Trinket1:Cooldown() == 0, as otherwise a non-on-use trinket in slot 1 causes this to never be suggested.
+    if Trinket2ToUse and (((S.EyeBeam:CooldownRemains() < GCDMax and Enemies8yCount > 1 or Player:BuffUp(S.MetamorphosisBuff)) or not Trinket2:HasUseBuff() or BossFightRemains < 25) and (not I.WitherbarksBranch:IsEquipped() or Trinket1:CooldownRemains() > 20 or Trinket1:Cooldown() == 0)) then
+      if Cast(Trinket2ToUse, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(Trinket2Range)) then return "trinket2"; end
+    end
+  end
+
+  if S.ReaversGlaive:IsCastable() then
+    if Cast(S.ReaversGlaive, nil, nil, not Target:IsInRange(40)) then return "reavers_glaive"; end
+  end
+
+  if S.VengefulRetreat:IsCastable() then
+    if Cast(S.VengefulRetreat, Settings.Havoc.OffGCDasOffGCD.VengefulRetreat) then return "vengeful_retreat"; end
+  end
+
+  if S.TheHunt:IsCastable() then
+    if Cast(S.TheHunt, nil, Settings.CommonsDS.DisplayStyle.TheHunt, not Target:IsSpellInRange(S.TheHunt)) then return "the_hunt"; end
+  end
+
+  if S.DeathSweep:IsReady() then
+    if Cast(S.DeathSweep, nil, nil, not IsInMeleeRange(8)) then return "death_sweep"; end
+  end
+
+  if S.SigilofSpite:IsCastable() then
+    if Cast(S.SigilofSpite, nil, Settings.CommonsDS.DisplayStyle.Sigils, not Target:IsInRange(30)) then return "sigil_of_spite"; end
+  end
+
+  if S.Metamorphosis:IsCastable() and S.EyeBeam:CooldownDown() then
+    if Cast(S.Metamorphosis, nil, Settings.CommonsDS.DisplayStyle.Metamorphosis, not Target:IsInRange(40)) then return "metamorphosis"; end
+  end
+
+  if S.EyeBeam:IsReady() then
+    if Cast(S.EyeBeam, Settings.Havoc.GCDasOffGCD.EyeBeam, nil, not IsInMeleeRange(20)) then return "eye_beam"; end
+  end
+
+  if S.BladeDance:IsReady() then
+    if Cast(S.BladeDance, nil, nil, not IsInMeleeRange(8)) then return "blade_dance"; end
+  end
+
+  if S.Annihilation:IsReady() then
+    if Cast(S.Annihilation, nil, nil, not IsInMeleeRange(5)) then return "annihilation"; end
+  end
+
+  if S.ChaosStrike:IsReady() and false and Player:BuffUp(S.RendingStrikeBuff) then
+    if Cast(S.ChaosStrike, nil, nil, not Target:IsSpellInRange(S.ChaosStrike)) then return "chaos_strike"; end
+  end
+
+  if S.Felblade:IsCastable() and Player:Fury() < 80 then
+    if Cast(S.Felblade, nil, nil, not Target:IsSpellInRange(S.Felblade)) then return "felblade"; end
+  end
+
+  if S.SigilofFlame:IsCastable() and Player:Fury() < 90 then
+    if Cast(S.SigilofFlame, nil, Settings.CommonsDS.DisplayStyle.Sigils, not Target:IsInRange(30)) then return "sigil_of_flame"; end
+  end
+
+  if S.ChaosStrike:IsReady() then
+    if Cast(S.ChaosStrike, nil, nil, not Target:IsSpellInRange(S.ChaosStrike)) then return "chaos_strike"; end
+  end
+
+  if S.ImmolationAura:IsCastable() then
+    if Cast(S.ImmolationAura, Settings.Havoc.GCDasOffGCD.ImmolationAura, nil, not IsInMeleeRange(8)) then return "immolation_aura"; end
+  end
+
+  if Cast(S.DemonsBite, nil, nil, not Target:IsInMeleeRange(5)) then return "demons_bite"; end
+end
+
 local function Meta()
   -- death_sweep,if=buff.metamorphosis.remains<gcd.max
   if S.DeathSweep:IsReady() and (Player:BuffRemains(S.MetamorphosisBuff) < GCDMax) then
@@ -487,6 +562,11 @@ local function APL()
     VarFelBarrage = S.FelBarrage:IsAvailable() and (S.FelBarrage:CooldownRemains() < GCDMax * 7 and (S.Metamorphosis:CooldownDown() or Enemies12yCount > 2) or Player:BuffUp(S.FelBarrage))
     -- disrupt (and stun interrupts)
     local ShouldReturn = Everyone.Interrupt(S.Disrupt, Settings.CommonsDS.DisplayStyle.Interrupts, StunInterrupts); if ShouldReturn then return ShouldReturn; end
+
+    if (Settings.Havoc.UseSimplifiedRotation) then
+      return SimplifiedAPL()
+    end
+
     -- call_action_list,name=cooldown
     -- Note: CDsON check is within Cooldown(), as the function also includes trinkets and potions
     local ShouldReturn = Cooldown(); if ShouldReturn then return ShouldReturn; end
