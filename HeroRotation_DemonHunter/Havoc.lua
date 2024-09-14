@@ -170,12 +170,12 @@ local function SimplifiedAPL()
     if Trinket1ToUse and (((S.EyeBeam:CooldownRemains() < GCDMax and Enemies8yCount > 1 or Player:BuffUp(S.MetamorphosisBuff)) or not Trinket1:HasUseBuff() or BossFightRemains < 25) and (not I.WitherbarksBranch:IsEquipped() or Trinket2:CooldownRemains() > 20 or Trinket2:Cooldown() == 0)) then
       if Cast(Trinket1ToUse, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(Trinket1Range)) then return "trinket1"; end
     end
-    local Trinket2ToUse, _, Trinket2Range = Player:GetUseableItems(OnUseExcludes, 14)
+    --local Trinket2ToUse, _, Trinket2Range = Player:GetUseableItems(OnUseExcludes, 14)
     -- use_item,slot=trinket2,use_off_gcd=1,if=((cooldown.eye_beam.remains<gcd.max&active_enemies>1|buff.metamorphosis.up)&(raid_event.adds.in>trinket.2.cooldown.duration-15|raid_event.adds.remains>8)|!trinket.2.has_buff.any|fight_remains<25)&(!equipped.witherbarks_branch|trinket.1.cooldown.remains>20)&time>0
     -- Note: Added check for Trinket1:Cooldown() == 0, as otherwise a non-on-use trinket in slot 1 causes this to never be suggested.
-    if Trinket2ToUse and (((S.EyeBeam:CooldownRemains() < GCDMax and Enemies8yCount > 1 or Player:BuffUp(S.MetamorphosisBuff)) or not Trinket2:HasUseBuff() or BossFightRemains < 25) and (not I.WitherbarksBranch:IsEquipped() or Trinket1:CooldownRemains() > 20 or Trinket1:Cooldown() == 0)) then
-      if Cast(Trinket2ToUse, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(Trinket2Range)) then return "trinket2"; end
-    end
+    --if Trinket2ToUse and (((S.EyeBeam:CooldownRemains() < GCDMax and Enemies8yCount > 1 or Player:BuffUp(S.MetamorphosisBuff)) or not Trinket2:HasUseBuff() or BossFightRemains < 25) and (not I.WitherbarksBranch:IsEquipped() or Trinket1:CooldownRemains() > 20 or Trinket1:Cooldown() == 0)) then
+      --if Cast(Trinket2ToUse, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(Trinket2Range)) then return "trinket2"; end
+    --end
   end
 
   if S.ReaversGlaive:IsCastable() then
