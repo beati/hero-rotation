@@ -193,6 +193,10 @@ local function SimplifiedAPL()
     if Cast(S.SoulSunder, nil, nil, not IsInMeleeRange) then return "soul_sunder"; end
   end
 
+  if S.ReaversGlaive:IsCastable() then
+    if Cast(S.ReaversGlaive, Settings.CommonsOGCD.OffGCDasOffGCD.ReaversGlaive, nil, not Target:IsInRange(50)) then return "reavers_glaive"; end
+  end
+
   if S.SpiritBomb:IsReady() and ((EnemiesCount8yMelee == 1 and SoulFragments >= 5 and false) or (EnemiesCount8yMelee > 1 and (SoulFragments >= 4 or SoulFragments >=3 and Player:BuffUp(S.MetamorphosisBuff)))) then
     if Cast(S.SpiritBomb, nil, nil, not Target:IsInMeleeRange(8)) then return "spirit_bomb simplified 18 Enemy: " .. EnemiesCount8yMelee .. "Souls: " .. SoulFragments; end
   end
@@ -224,11 +228,15 @@ local function SimplifiedAPL()
     if Cast(S.ImmolationAura) then return "immolation_aura simplified 22"; end
   end
 
-  if S.Fracture:IsCastable() and ((EnemiesCount8yMelee == 1 and Player:FuryDeficit() >= VarFractureFuryGain) or (EnemiesCount8yMelee > 1 and (SoulFragments <= 2 or SoulFragments <= 3 and not Player:BuffUp(S.MetamorphosisBuff) or SoulFragments > 0 and Player:Fury() < 40))) then
+  if S.Felblade:IsCastable() and (Player:FuryDeficit() > 30) then
+    if Cast(S.Felblade, nil, nil, not Target:IsSpellInRange(S.Felblade)) then return "felblade"; end
+  end
+
+  if S.Fracture:IsCastable() and (((EnemiesCount8yMelee == 1 or Player:HeroTreeID() == 35) and Player:FuryDeficit() >= VarFractureFuryGain) or (EnemiesCount8yMelee > 1 and (SoulFragments <= 2 or SoulFragments <= 3 and not Player:BuffUp(S.MetamorphosisBuff) or SoulFragments > 0 and Player:Fury() < 40))) then
     if Cast(S.Fracture, nil, nil, not IsInMeleeRange) then return "fracture simplified 26"; end
   end
 
-  if S.SoulCleave:IsReady() and (EnemiesCount8yMelee == 1 or SoulFragments == 0) then
+  if S.SoulCleave:IsReady() and (EnemiesCount8yMelee == 1 or Player:HeroTreeID() == 35 or SoulFragments == 0) then
     if Cast(S.SoulCleave, nil, nil, not Target:IsSpellInRange(S.SoulCleave)) then return "soul_cleave simplified 20"; end
   end
   if S.SoulSunder:IsReady() and (EnemiesCount8yMelee == 1 or SoulFragments == 0) then
@@ -393,11 +401,16 @@ local function AR()
     if ItemToUse then
       local DisplayStyle = Settings.CommonsDS.DisplayStyle.Trinkets
       if ItemSlot ~= 13 and ItemSlot ~= 14 then DisplayStyle = Settings.CommonsDS.DisplayStyle.Items end
-      if ((ItemSlot == 13 or ItemSlot == 14) and Settings.Commons.Enabled.Trinkets) or (ItemSlot ~= 13 and ItemSlot ~= 14 and Settings.Commons.Enabled.Items) then
+      if ((ItemSlot == 13 or (ItemSlot == 14 and false)) and Settings.Commons.Enabled.Trinkets) or (ItemSlot ~= 13 and ItemSlot ~= 14 and Settings.Commons.Enabled.Items) then
         if Cast(ItemToUse, nil, DisplayStyle, not Target:IsInRange(ItemRange)) then return "Generic use_items for " .. ItemToUse:Name(); end
       end
     end
   end
+
+  if (Settings.Vengeance.UseSimplifiedRotation) then
+    return SimplifiedAPL()
+  end
+
   -- call_action_list,name=externals,if=variable.cooldown_sync
   -- Note: Not handling externals.
   -- run_action_list,name=rg_sequence,if=buff.glaive_flurry.up|buff.rending_strike.up
