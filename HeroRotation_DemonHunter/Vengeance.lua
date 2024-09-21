@@ -184,6 +184,14 @@ local function SimplifiedAPL()
     VarFractureFuryGain = VarFractureFuryNotInMeta
   end
 
+  if S.SpiritBurst:IsReady() and Player:Demonsurge("SpiritBurst") then
+    if Cast(S.SpiritBurst, nil, nil, not Target:IsInMeleeRange(8)) then return "spirit_burst2"; end
+  end
+
+  if S.SoulSunder:IsReady() and Player:Demonsurge("SoulSunder") then
+    if Cast(S.SoulSunder, nil, nil, not IsInMeleeRange) then return "soul_sunder"; end
+  end
+
   if S.SpiritBomb:IsReady() and ((EnemiesCount8yMelee == 1 and SoulFragments >= 5 and false) or (EnemiesCount8yMelee > 1 and (SoulFragments >= 4 or SoulFragments >=3 and Player:BuffUp(S.MetamorphosisBuff)))) then
     if Cast(S.SpiritBomb, nil, nil, not Target:IsInMeleeRange(8)) then return "spirit_bomb simplified 18 Enemy: " .. EnemiesCount8yMelee .. "Souls: " .. SoulFragments; end
   end
@@ -191,8 +199,24 @@ local function SimplifiedAPL()
     if Cast(S.SpiritBurst, nil, nil, not Target:IsInMeleeRange(8)) then return "spirit_burst simplified 18 Enemy: " .. EnemiesCount8yMelee .. "Souls: " .. SoulFragments; end
   end
 
+  if S.SigilofDoom:IsCastable() and Target:DebuffRefreshable(S.SigilofDoomDebuff) then
+    if S.SigilofDoom:Charges() > 1 then
+      if Cast(S.SigilofDoom, nil,nil, not Target:IsInRange(30)) then return "sigil_of_flame simplified 28 (Normal)"; end
+    else
+      if Cast(S.SigilofDoom, nil, Settings.CommonsDS.DisplayStyle.Sigils, not Target:IsInRange(30)) then return "sigil_of_flame simplified 28 (Normal)"; end
+    end
+  end
+
   if S.SigilofFlame:IsCastable() and Target:DebuffRefreshable(S.SigilofFlameDebuff) then
-    if Cast(S.SigilofFlame, nil, nil, not Target:IsInRange(30)) then return "sigil_of_flame simplified 28 (Normal)"; end
+    if S.SigilofFlame:Charges() > 1 then
+      if Cast(S.SigilofFlame, nil,nil, not Target:IsInRange(30)) then return "sigil_of_flame simplified 28 (Normal)"; end
+    else
+      if Cast(S.SigilofFlame, nil, Settings.CommonsDS.DisplayStyle.Sigils, not Target:IsInRange(30)) then return "sigil_of_flame simplified 28 (Normal)"; end
+    end
+  end
+
+  if S.ConsumingFire:IsCastable() then
+    if Cast(S.ConsumingFire) then return "consuming_fire simplified 22"; end
   end
 
   if S.ImmolationAura:IsCastable() then
