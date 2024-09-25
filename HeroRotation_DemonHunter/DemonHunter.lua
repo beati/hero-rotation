@@ -81,6 +81,7 @@ Spell.DemonHunter.FelScarred = {
   SigilofDoom                           = Spell(452490),
   SoulSunder                            = Spell(452436),
   SpiritBurst                           = Spell(452437),
+  AbyssalGaze                           = Spell(452497),
   -- Talents
   Demonsurge                            = Spell(454402),
   -- Buffs
