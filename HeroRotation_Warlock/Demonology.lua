@@ -87,6 +87,7 @@ SetPrecombatVariables()
 --- ===== Trinket Variables =====
 local Trinket1, Trinket2
 local VarTrinket1ID, VarTrinket2ID
+local VarTrinket1Level, VarTrinket2Level
 local VarTrinket1Spell, VarTrinket2Spell
 local VarTrinket1Range, VarTrinket2Range
 local VarTrinket1CastTime, VarTrinket2CastTime
@@ -102,8 +103,8 @@ local VarTrinketFailures = 0
 local function SetTrinketVariables()
   local T1, T2 = Player:GetTrinketData()
 
-  -- If we don't have trinket items, try again in 2 seconds.
-  if VarTrinketFailures < 5 and (T1.ID == 0 or T2.ID == 0) then
+  -- If we don't have trinket items, try again in 5 seconds.
+  if VarTrinketFailures < 5 and ((T1.ID == 0 or T2.ID == 0) or (T1.Level == 0 or T2.Level == 0) or (T1.SpellID > 0 and not T1.Usable or T2.SpellID > 0 and not T2.Usable)) then
     VarTrinketFailures = VarTrinketFailures + 1
     Delay(5, function()
         SetTrinketVariables()
@@ -117,6 +118,9 @@ local function SetTrinketVariables()
 
   VarTrinket1ID = T1.ID
   VarTrinket2ID = T2.ID
+
+  VarTrinket1Level = T1.Level
+  VarTrinket2Level = T2.Level
 
   VarTrinket1Spell = T1.Spell
   VarTrinket1Range = T1.Range
@@ -152,10 +156,8 @@ local function SetTrinketVariables()
     VarTrinket2Sync = 1
   end
 
-  local T1Level = Trinket1:Level() or 0
-  local T2Level = Trinket2:Level() or 0
   VarDamageTrinketPriority = 1
-  if not VarTrinket1Buffs and not VarTrinket2Buffs and T2Level > T1Level then
+  if not VarTrinket1Buffs and not VarTrinket2Buffs and VarTrinket2Level > VarTrinket1Level then
     VarDamageTrinketPriority = 2
   end
 
@@ -163,7 +165,7 @@ local function SetTrinketVariables()
   local T1BuffDur = VarTrinket1BuffDuration > 0 and VarTrinket1BuffDuration or 1
   local T2BuffDur = VarTrinket2BuffDuration > 0 and VarTrinket2BuffDuration or 1
   VarTrinketPriority = 1
-  if not VarTrinket1Buffs and VarTrinket2Buffs or VarTrinket2Buffs and ((VarTrinket2CD / T2BuffDur) * (VarTrinket2Sync)) > (((VarTrinket1CD / T1BuffDur) * (VarTrinket1Sync)) * (1 + ((Trinket1:Level() - Trinket2:Level()) / 100))) then
+  if not VarTrinket1Buffs and VarTrinket2Buffs or VarTrinket2Buffs and ((VarTrinket2CD / T2BuffDur) * (VarTrinket2Sync)) > (((VarTrinket1CD / T1BuffDur) * (VarTrinket1Sync)) * (1 + ((VarTrinket1Level - VarTrinket2Level) / 100))) then
     VarTrinketPriority = 2
   end
 end
@@ -712,17 +714,9 @@ local function APL()
     if S.SummonDemonicTyrant:CooldownRemains() < Player:GCD() * 14 then
       local ShouldReturn = Tyrant(); if ShouldReturn then return ShouldReturn; end
     end
-    -- hand_of_guldan,if=time<0.5&(fight_remains%%95>40|fight_remains%%95<15)&(talent.reign_of_tyranny|active_enemies>2)
-    if S.HandofGuldan:IsReady() and (CombatTime < 0.5 and (FightRemains % 95 > 40 or FightRemains % 95 < 15) and (S.ReignofTyranny:IsAvailable() or EnemiesCount8ySplash > 2)) then
-      if Cast(S.HandofGuldan, nil, nil, not Target:IsSpellInRange(S.HandofGuldan)) then return "hand_of_guldan main 4"; end
-    end
     -- call_dreadstalkers,if=cooldown.summon_demonic_tyrant.remains>25|variable.next_tyrant_cd>25
     if S.CallDreadstalkers:IsReady() and (S.SummonDemonicTyrant:CooldownRemains() > 25 or VarNextTyrantCD > 25) then
       if Cast(S.CallDreadstalkers, nil, nil, not Target:IsSpellInRange(S.CallDreadstalkers)) then return "call_dreadstalkers main 6"; end
-    end
-    -- summon_demonic_tyrant,if=buff.vilefiend.up|buff.grimoire_felguard.up|cooldown.grimoire_felguard.remains>60
-    if CDsON() and S.SummonDemonicTyrant:IsReady() and (VilefiendActive() or GrimoireFelguardActive() or S.GrimoireFelguard:CooldownRemains() > 60) then
-      if Cast(S.SummonDemonicTyrant, Settings.Demonology.GCDasOffGCD.SummonDemonicTyrant) then return "summon_demonic_tyrant main 8"; end
     end
     -- summon_vilefiend,if=cooldown.summon_demonic_tyrant.remains>30
     if VilefiendAbility:IsReady() and (S.SummonDemonicTyrant:CooldownRemains() > 30) then
@@ -740,16 +734,16 @@ local function APL()
     if S.PowerSiphon:IsCastable() and (DemonicCoreStacks < 3 and S.SummonDemonicTyrant:CooldownRemains() > 25) then
       if Cast(S.PowerSiphon, Settings.Demonology.GCDasOffGCD.PowerSiphon) then return "power_siphon main 16"; end
     end
-    -- demonic_strength,if=!(raid_event.adds.in<45-raid_event.add.duration)
-    if S.DemonicStrength:IsCastable() then
+    -- demonic_strength,if=active_enemies>1
+    if S.DemonicStrength:IsCastable() and (EnemiesCount8ySplash > 1) then
       if Cast(S.DemonicStrength, Settings.Demonology.GCDasOffGCD.DemonicStrength) then return "demonic_strength main 18"; end
     end
-    -- bilescourge_bombers
-    if S.BilescourgeBombers:IsReady() then
+    -- bilescourge_bombers,if=active_enemies>1
+    if S.BilescourgeBombers:IsReady() and (EnemiesCount8ySplash > 1) then
       if Cast(S.BilescourgeBombers, nil, nil, not Target:IsInRange(40)) then return "bilescourge_bombers main 20"; end
     end
-    -- guillotine,if=(cooldown.demonic_strength.remains|!talent.demonic_strength)&(!raid_event.adds.exists|raid_event.adds.exists&raid_event.adds.remains>6)
-    if S.Guillotine:IsCastable() and (S.DemonicStrength:CooldownDown() or not S.DemonicStrength:IsAvailable()) then
+    -- guillotine,if=active_enemies>1&(cooldown.demonic_strength.remains|!talent.demonic_strength)&(!raid_event.adds.exists|raid_event.adds.exists&raid_event.adds.remains>6)
+    if S.Guillotine:IsCastable() and (EnemiesCount8ySplash > 1 and (S.DemonicStrength:CooldownDown() or not S.DemonicStrength:IsAvailable())) then
       if Cast(S.Guillotine, Settings.Demonology.GCDasOffGCD.Guillotine, nil, not Target:IsInRange(40)) then return "guillotine main 22"; end
     end
     -- ruination

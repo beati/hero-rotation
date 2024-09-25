@@ -53,15 +53,49 @@ Spell.Evoker.Commons = {
   LeapingFlamesBuff                     = Spell(370901),
   ScarletAdaptationBuff                 = Spell(372470),
   SourceofMagicBuff                     = Spell(369459),
-  -- Trinket Effects
+  TipTheScalesBuff                      = Spell(370553),
+  -- DF Trinket Effects
   SpoilsofNeltharusCrit                 = Spell(381954),
   SpoilsofNeltharusHaste                = Spell(381955),
   SpoilsofNeltharusMastery              = Spell(381956),
   SpoilsofNeltharusVers                 = Spell(381957),
+  -- TWW Trinket Effects
+  SpymastersReportBuff                  = Spell(451199),
+  SpymastersWebBuff                     = Spell(444959),
   -- Utility
   Quell                                 = Spell(351338),
   -- Other
   Pool                                  = Spell(999910)
+}
+
+Spell.Evoker.Chronowarden = {
+  -- Talents
+  ThreadsofFate                         = Spell(431715),
+}
+
+Spell.Evoker.Flameshaper = {
+  -- Talents
+  Engulf                                = Spell(443328),
+  Enkindle                              = Spell(444016),
+  FanTheFlames                          = Spell(444318),
+  TravelingFlame                        = Spell(444140),
+  -- Buffs
+  EnkindleBuff                        = Spell(444017),
+}
+
+Spell.Evoker.Scalecommander = {
+  -- Talents
+  Bombardments                          = Spell(434300),
+  Maneuverability                       = Spell(433871),
+  MassDisintegrate                      = Spell(436335),
+  MassEruption                          = Spell(438587),
+  MeltArmor                             = Spell(441176),
+  Wingleader                            = Spell(441206),
+  -- Buffs
+  MassDisintegrateBuff                  = Spell(436336),
+  MassEruptionBuff                      = Spell(438588),
+  -- Debuffs
+  BombardmentsDebuff                    = Spell(434473),
 }
 
 Spell.Evoker.Augmentation = MergeTableByKey(Spell.Evoker.Commons, {
@@ -75,6 +109,7 @@ Spell.Evoker.Augmentation = MergeTableByKey(Spell.Evoker.Commons, {
   EbonMight                             = Spell(395152),
   Eruption                              = Spell(395160),
   FontofMagic                           = Spell(408083),
+  ImminentDestruction                   = Spell(459537),
   InterwovenThreads                     = Spell(412713),
   Prescience                            = Spell(409311),
   PupilofAlexstrasza                    = Spell(407814),
@@ -92,10 +127,13 @@ Spell.Evoker.Augmentation = MergeTableByKey(Spell.Evoker.Commons, {
   -- Debuffs
   TemporalWoundDebuff                   = Spell(409560),
 })
+Spell.Evoker.Augmentation = MergeTableByKey(Spell.Evoker.Augmentation, Spell.Evoker.Chronowarden)
+Spell.Evoker.Augmentation = MergeTableByKey(Spell.Evoker.Augmentation, Spell.Evoker.Scalecommander)
 
 Spell.Evoker.Devastation = MergeTableByKey(Spell.Evoker.Commons, {
   -- Talents
   Animosity                             = Spell(375797),
+  ArcaneIntensity                       = Spell(375618),
   ArcaneVigor                           = Spell(386342),
   Burnout                               = Spell(375801),
   Catalyze                              = Spell(386283),
@@ -117,6 +155,7 @@ Spell.Evoker.Devastation = MergeTableByKey(Spell.Evoker.Commons, {
   RagingInferno                         = Spell(405659),
   RubyEmbers                            = Spell(365937),
   Scintillation                         = Spell(370821),
+  ScorchingEmbers                       = Spell(370819),
   ShatteringStar                        = Spell(370452),
   Snapfire                              = Spell(370783),
   Tyranny                               = Spell(376888),
@@ -134,30 +173,28 @@ Spell.Evoker.Devastation = MergeTableByKey(Spell.Evoker.Commons, {
   SnapfireBuff                          = Spell(370818),
   -- Debuffs
   LivingFlameDebuff                     = Spell(361500),
+  ShatteringStarDebuff                  = Spell(370452),
 })
+Spell.Evoker.Devastation = MergeTableByKey(Spell.Evoker.Devastation, Spell.Evoker.Flameshaper)
+Spell.Evoker.Devastation = MergeTableByKey(Spell.Evoker.Devastation, Spell.Evoker.Scalecommander)
 
 -- Items
 if not Item.Evoker then Item.Evoker = {} end
 Item.Evoker.Commons = {
-  -- Trinkets
-  AshesoftheEmbersoul                   = Item(207167, {13, 14}),
-  BalefireBranch                        = Item(159630, {13, 14}),
+  -- Trinkets kept for variables
   BeacontotheBeyond                     = Item(203963, {13, 14}),
   BelorrelostheSuncaller                = Item(207172, {13, 14}),
-  DragonfireBombDispenser               = Item(202610, {13, 14}),
-  IrideusFragment                       = Item(193743, {13, 14}),
   MirrorofFracturedTomorrows            = Item(207581, {13, 14}),
-  NeltharionsCalltoChaos                = Item(204201, {13, 14}),
-  NymuesUnravelingSpindle               = Item(208615, {13, 14}),
   RubyWhelpShell                        = Item(193757, {13, 14}),
-  ScreamingBlackDragonscale             = Item(202612, {13, 14}),
-  SpoilsofNeltharus                     = Item(193773, {13, 14}),
-  UmbrelskulsFracturedHeart             = Item(193639, {13, 14}),
-  VesselofSearingShadow                 = Item(202615, {13, 14}),
   WhisperingIncarnateIcon               = Item(194301, {13, 14}),
-  -- Items
-  Dreambinder                           = Item(208616, {16}),
-  Iridal                                = Item(208321, {16}),
+  -- DF Trinkets
+  NymuesUnravelingSpindle               = Item(208615, {13, 14}),
+  -- TWW Trinkets
+  AberrantSpellforge                    = Item(212451, {13, 14}),
+  ConcoctionKissofDeath                 = Item(215174, {13, 14}),
+  SpymastersWeb                         = Item(220202, {13, 14}),
+  TreacherousTransmitter                = Item(221023, {13, 14}),
+  -- DF Items
   KharnalexTheFirstLight                = Item(195519, {16}),
 }
 
