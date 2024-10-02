@@ -224,12 +224,18 @@ local function SimplifiedAPL()
   -- Vars to calculate Fracture Fury gain
   local VarFractureFuryInMeta = 45
   local VarFractureFuryNotInMeta = 25
+  local VarFractureSoulFragmentsInMeta = 3
+  local VarFractureSoulFragmentsNotInMeta = 2
   local VarFractureFuryGain = 0
+  local VarFractureSoulFragmentsGain = 0
   if Player:BuffUp(S.MetamorphosisBuff) then
     VarFractureFuryGain = VarFractureFuryInMeta
+    VarFractureSoulFragmentsGain = VarFractureSoulFragmentsInMeta
   else
     VarFractureFuryGain = VarFractureFuryNotInMeta
+    VarFractureSoulFragmentsGain = VarFractureSoulFragmentsNotInMeta
   end
+
 
   if S.SpiritBurst:IsReady() and Player:Demonsurge("SpiritBurst") then
     if Cast(S.SpiritBurst, nil, nil, not Target:IsInMeleeRange(8)) then return "spirit_burst2"; end
@@ -278,7 +284,7 @@ local function SimplifiedAPL()
     if Cast(S.Felblade, nil, nil, not Target:IsSpellInRange(S.Felblade)) then return "felblade"; end
   end
 
-  if S.Fracture:IsCastable() and (((EnemiesCount8yMelee == 1 or Player:HeroTreeID() == 35) and Player:FuryDeficit() >= VarFractureFuryGain) or (EnemiesCount8yMelee > 1 and (SoulFragments <= 2 or SoulFragments <= 3 and not Player:BuffUp(S.MetamorphosisBuff) or SoulFragments > 0 and Player:Fury() < 40))) then
+  if S.Fracture:IsCastable() and (((EnemiesCount8yMelee == 1 or Player:HeroTreeID() == 35) and ((5-SoulFragments >= VarFractureSoulFragmentsGain and Player:FuryDeficit() >= VarFractureFuryGain+10) or (5-SoulFragments < VarFractureSoulFragmentsGain and Player:Fury() < 30))) or (EnemiesCount8yMelee > 1 and (SoulFragments <= 2 or SoulFragments <= 3 and not Player:BuffUp(S.MetamorphosisBuff) or SoulFragments > 0 and Player:Fury() < 40))) then
     if Cast(S.Fracture, nil, nil, not IsInMeleeRange) then return "fracture simplified 26"; end
   end
 
