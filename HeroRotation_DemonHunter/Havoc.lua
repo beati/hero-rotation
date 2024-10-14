@@ -257,7 +257,7 @@ local function AR()
   if Cast(S.DemonsBite, nil, nil, not Target:IsInMeleeRange(5)) then return "demons_bite"; end
 end
 
-local function FS()
+local function FSMove()
   if Target:DebuffUp(S.EssenceBreakDebuff) then
     if S.DeathSweep:IsReady() then
       if Cast(S.DeathSweep, nil, nil, not IsInMeleeRange(8)) then return "death_sweep"; end
@@ -332,6 +332,63 @@ local function FS()
   --if S.SigilofFlame:IsCastable() and Player:Fury() < 90 then
     --if Cast(S.SigilofFlame, nil, Settings.CommonsDS.DisplayStyle.Sigils, not Target:IsInRange(30)) then return "sigil_of_flame"; end
   --end
+
+  if S.ChaosStrike:IsReady() then
+    if Cast(S.ChaosStrike, nil, nil, not Target:IsSpellInRange(S.ChaosStrike)) then return "chaos_strike"; end
+  end
+
+  if Cast(S.DemonsBite, nil, nil, not Target:IsInMeleeRange(5)) then return "demons_bite"; end
+end
+
+local function FS()
+  if S.TheHunt:IsCastable() then
+    if Cast(S.TheHunt, nil, Settings.CommonsDS.DisplayStyle.TheHunt, not Target:IsSpellInRange(S.TheHunt)) then return "the_hunt"; end
+  end
+
+  if S.SigilofFlame:IsCastable() then
+    if Cast(S.SigilofFlame, nil, nil, not Target:IsInRange(30)) then return "sigil_of_flame"; end
+  end
+  if S.SigilofDoom:IsCastable() then
+    if Cast(S.SigilofDoom, nil, nil, not Target:IsInRange(30)) then return "sigil_of_flame simplified 28 (Normal)"; end
+  end
+
+  if S.DeathSweep:IsReady() then
+    if Cast(S.DeathSweep, nil, nil, not IsInMeleeRange(8)) then return "death_sweep"; end
+  end
+
+  if S.Metamorphosis:IsCastable() and S.EyeBeam:CooldownDown() and not Player:BuffUp(S.MetamorphosisBuff) then
+    if Cast(S.Metamorphosis, nil, Settings.CommonsDS.DisplayStyle.Metamorphosis, not Target:IsInRange(40)) then return "metamorphosis"; end
+  end
+
+  if S.EyeBeam:IsReady() then
+    if Cast(S.EyeBeam, Settings.Havoc.GCDasOffGCD.EyeBeam, nil, not IsInMeleeRange(20)) then return "eye_beam"; end
+  end
+  if S.AbyssalGaze:IsReady() then
+    if Cast(S.AbyssalGaze, Settings.Havoc.GCDasOffGCD.EyeBeam, nil, not IsInMeleeRange(20)) then return "abyssal_gaze"; end
+  end
+
+  if S.BladeDance:IsReady() then
+    if Cast(S.BladeDance, nil, nil, not IsInMeleeRange(8)) then return "blade_dance"; end
+  end
+
+  if S.Annihilation:IsReady() then
+    if Cast(S.Annihilation, nil, nil, not IsInMeleeRange(5)) then return "annihilation"; end
+  end
+
+  if S.GlaiveTempest:IsReady() then
+    if Cast(S.GlaiveTempest, Settings.Havoc.GCDasOffGCD.GlaiveTempest) then return "glaive_tempest fel_barrage 14"; end
+  end
+
+  if S.ImmolationAura:IsCastable() then
+    if Cast(S.ImmolationAura, nil, nil, not IsInMeleeRange(8)) then return "immolation_aura"; end
+  end
+  if S.ConsumingFire:IsCastable() then
+    if Cast(S.ConsumingFire) then return "consuming_fire simplified 22"; end
+  end
+
+  if S.Felblade:IsCastable() and Player:Fury() < 80 then
+    if Cast(S.Felblade, nil, nil, not Target:IsSpellInRange(S.Felblade)) then return "felblade"; end
+  end
 
   if S.ChaosStrike:IsReady() then
     if Cast(S.ChaosStrike, nil, nil, not Target:IsSpellInRange(S.ChaosStrike)) then return "chaos_strike"; end
