@@ -164,7 +164,7 @@ local function Precombat()
   -- Note: Moved the above variables to declarations and PLAYER_EQUIPMENT_CHANGED.
   -- Manually added: Group Battle Shout check
   if S.BattleShout:IsCastable() and Everyone.GroupBuffMissing(S.BattleShoutBuff) then
-    if Cast(S.BattleShout, Settings.CommonsOGCD.GCDasOffGCD.BattleShout) then return "battle_shout precombat 4"; end
+    if Cast(S.BattleShout, nil, Settings.CommonsDS.DisplayStyle.BattleShout) then return "battle_shout precombat 4"; end
   end
   -- use_item,name=treacherous_transmitter
   if Settings.Commons.Enabled.Trinkets and I.TreacherousTransmitter:IsEquippedAndReady() then
@@ -1003,7 +1003,7 @@ local function APL()
     end
     -- Manually added: battle_shout during combat
     if S.BattleShout:IsCastable() and Settings.Commons.ShoutDuringCombat and Everyone.GroupBuffMissing(S.BattleShoutBuff) then
-      if Cast(S.BattleShout, Settings.CommonsOGCD.GCDasOffGCD.BattleShout) then return "battle_shout main 2"; end
+      if Cast(S.BattleShout, nil, Settings.CommonsDS.DisplayStyle.BattleShout) then return "battle_shout main 2"; end
     end
     -- auto_attack
     -- charge,if=time<=0.5|movement.distance>5
@@ -1026,10 +1026,10 @@ local function APL()
     -- Manually added: VR/IV
     if Player:HealthPercentage() < Settings.Commons.VictoryRushHP then
       if S.VictoryRush:IsReady() then
-        if Cast(S.VictoryRush, nil, nil, not TargetInMeleeRange) then return "victory_rush heal 10"; end
+        if Cast(S.VictoryRush, nil, Settings.CommonsDS.DisplayStyle.VictoryRush, not TargetInMeleeRange) then return "victory_rush heal 10"; end
       end
       if S.ImpendingVictory:IsReady() then
-        if Cast(S.ImpendingVictory, nil, nil, not TargetInMeleeRange) then return "impending_victory heal 12"; end
+        if Cast(S.ImpendingVictory, nil, Settings.CommonsDS.DisplayStyle.VictoryRush, not TargetInMeleeRange) then return "impending_victory heal 12"; end
       end
     end
     -- call_action_list,name=trinkets
