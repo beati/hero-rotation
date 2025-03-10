@@ -257,6 +257,7 @@ local function SimplifiedAPL()
     VarFractureSoulFragmentsGain = VarFractureSoulFragmentsNotInMeta
   end
 
+  local spiritBombEnemyCountThreshold = 7
 
   if S.SpiritBurst:IsReady() and Player:Demonsurge("SpiritBurst") then
     if Cast(S.SpiritBurst, nil, nil, not Target:IsInMeleeRange(8)) then return "spirit_burst2"; end
@@ -270,10 +271,10 @@ local function SimplifiedAPL()
     if Cast(S.ReaversGlaive, Settings.CommonsOGCD.OffGCDasOffGCD.ReaversGlaive, nil, not Target:IsInRange(50)) then return "reavers_glaive"; end
   end
 
-  if S.SpiritBomb:IsReady() and ((EnemiesCount8yMelee == 1 and SoulFragments >= 5 and false) or (EnemiesCount8yMelee > 1 and (SoulFragments >= 4 or SoulFragments >=3 and Player:BuffUp(S.MetamorphosisBuff)))) then
+  if S.SpiritBomb:IsReady() and (EnemiesCount8yMelee >= spiritBombEnemyCountThreshold and (SoulFragments >= 4 or SoulFragments >=3 and Player:BuffUp(S.MetamorphosisBuff))) then
     if Cast(S.SpiritBomb, nil, nil, not Target:IsInMeleeRange(8)) then return "spirit_bomb simplified 18 Enemy: " .. EnemiesCount8yMelee .. "Souls: " .. SoulFragments; end
   end
-  if S.SpiritBurst:IsReady() and ((EnemiesCount8yMelee == 1 and SoulFragments >= 5 and false) or (EnemiesCount8yMelee > 1 and (SoulFragments >= 4 or SoulFragments >=3 and Player:BuffUp(S.MetamorphosisBuff)))) then
+  if S.SpiritBurst:IsReady() and (EnemiesCount8yMelee >= spiritBombEnemyCountThreshold and (SoulFragments >= 4 or SoulFragments >=3 and Player:BuffUp(S.MetamorphosisBuff))) then
     if Cast(S.SpiritBurst, nil, nil, not Target:IsInMeleeRange(8)) then return "spirit_burst simplified 18 Enemy: " .. EnemiesCount8yMelee .. "Souls: " .. SoulFragments; end
   end
 
@@ -309,10 +310,10 @@ local function SimplifiedAPL()
     if Cast(S.Fracture, nil, nil, not IsInMeleeRange) then return "fracture simplified 26"; end
   end
 
-  if S.SoulCleave:IsReady() and (EnemiesCount8yMelee == 1 or Player:HeroTreeID() == 35 or SoulFragments == 0) then
+  if S.SoulCleave:IsReady() and (EnemiesCount8yMelee < spiritBombEnemyCountThreshold or Player:HeroTreeID() == 35 or SoulFragments == 0) then
     if Cast(S.SoulCleave, nil, nil, not Target:IsSpellInRange(S.SoulCleave)) then return "soul_cleave simplified 20"; end
   end
-  if S.SoulSunder:IsReady() and (EnemiesCount8yMelee == 1 or SoulFragments == 0) then
+  if S.SoulSunder:IsReady() and (EnemiesCount8yMelee < spiritBombEnemyCountThreshold or SoulFragments == 0) then
     if Cast(S.SoulSunder, nil, nil, not Target:IsSpellInRange(S.SoulSunder)) then return "soul_sunder simplified 20"; end
   end
 
