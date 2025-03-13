@@ -120,7 +120,7 @@ Spell.Shaman.Elemental = MergeTableByKey(Spell.Shaman.Commons, {
   Earthquake                            = MultiSpell(61882, 462620),
   FireElemental                         = Spell(198067),
   -- Talents
-  Ascendance                            = Spell(114050), -- Changes to 1219480 in 11.1
+  Ascendance                            = Spell(114050),
   EchoChamber                           = Spell(382032),
   EchooftheElementals                   = Spell(462864),
   EchooftheElements                     = Spell(333919),
@@ -175,12 +175,6 @@ Spell.Shaman.Elemental = MergeTableByKey(Spell.Shaman.Commons, {
 Spell.Shaman.Elemental = MergeTableByKey(Spell.Shaman.Elemental, Spell.Shaman.Farseer)
 Spell.Shaman.Elemental = MergeTableByKey(Spell.Shaman.Elemental, Spell.Shaman.Stormbringer)
 
--- Safety in case the 11.1 update isn't done immediately
-if TOCNum > 110007 then
-  Spell.Shaman.Elemental.Ascendance = Spell(1219480)
-  Spell.Shaman.Elemental.AscendanceBuff = Spell(1219480)
-end
-
 Spell.Shaman.Enhancement = MergeTableByKey(Spell.Shaman.Commons, {
   -- Abilities
   VoltaicBlazeAbility                   = Spell(470057),
@@ -206,6 +200,8 @@ Spell.Shaman.Enhancement = MergeTableByKey(Spell.Shaman.Commons, {
   LegacyoftheFrostWitch                 = Spell(384450),
   MoltenAssault                         = Spell(334033),
   OverflowingMaelstrom                  = Spell(384149),
+  PrimordialStorm                       = Spell(1218047),
+  PrimordialStormAbility                = Spell(1218090),
   RagingMaelstrom                       = Spell(384143),
   StaticAccumulation                    = Spell(384411),
   Stormblast                            = Spell(319930),
@@ -238,6 +234,8 @@ Spell.Shaman.Enhancement = MergeTableByKey(Spell.Shaman.Commons, {
   IceStrikeBuff                         = Spell(384357),
   LegacyoftheFrostWitchBuff             = Spell(384451),
   MaelstromWeaponBuff                   = Spell(344179),
+  PrimordialStormBuff                   = Spell(1218125),
+  StormblastBuff                        = Spell(470466),
   StormsurgeBuff                        = Spell(201846),
   WindfuryTotemBuff                     = Spell(327942),
   WinningStreakBuff                     = Spell(1218616), -- TWW S2 2pc
