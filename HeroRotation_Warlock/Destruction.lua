@@ -193,7 +193,7 @@ local function UnitWithHavoc(enemies)
   for k in pairs(enemies) do
     local CycleUnit = enemies[k]
     if CycleUnit:DebuffUp(S.Havoc) then
-      return true, CycleUnit:DebuffRemains(S.HavocDebuff), CycleUnit:DebuffRemains(S.ImmolateDebuff)
+      return true, CycleUnit:DebuffRemains(S.HavocDebuff)
     end
   end
   return false, 0, 0
@@ -447,7 +447,7 @@ local function Havoc()
   end
   -- wither,target_if=min:dot.wither.remains+100*debuff.havoc.remains,if=(((dot.wither.refreshable&variable.havoc_immo_time<5.4)&target.time_to_die>5)|((dot.wither.remains<2&dot.wither.remains<havoc_remains)|!dot.wither.ticking|variable.havoc_immo_time<2)&target.time_to_die>11)&soul_shard<4.5
   -- Note: ETIFWitherRemains2 is 99*debuff.havoc.remains. Just using that.
-  if S.Wither:IsCastable() and (SoulShards < 4.5) then
+  if S.Wither:IsReady() and (SoulShards < 4.5) then
     if Everyone.CastTargetIf(S.Wither, Enemies8ySplash, "min", EvaluateTargetIfFilterWitherRemains2, EvaluateTargetIfWitherHavoc, not Target:IsSpellInRange(S.Wither)) then return "wither havoc 12"; end
   end
   -- shadowburn,if=active_enemies<=4&(cooldown.shadowburn.full_recharge_time<=gcd.max*3|debuff.eradication.remains<=gcd.max&talent.eradication&!action.chaos_bolt.in_flight&!talent.diabolic_ritual)&(talent.conflagration_of_chaos|talent.blistering_atrophy)
@@ -820,7 +820,7 @@ local function APL()
 
   if Everyone.TargetIsValid() or Player:AffectingCombat() then
     -- Check Havoc Status
-    VarHavocActive, VarHavocRemains, VarHavocImmoTime = UnitWithHavoc(Enemies40y)
+    VarHavocActive, VarHavocRemains = UnitWithHavoc(Enemies40y)
 
     -- Calculate fight_remains
     BossFightRemains = HL.BossFightRemains()
