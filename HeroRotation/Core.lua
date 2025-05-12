@@ -279,6 +279,14 @@ function HR.CastLeft(Object)
   if HR.CastLeftOffset == 1 then
     HR.CastLeftCommon(Object)
   end
+  HR.LeftIconFrame:OverlayText("", 10)
+  return false
+end
+
+function HR.CastLeftAnnotated(Object, Text)
+  local Result = HR.CastLeft(Object)
+  local FontScale = (FontSize or 12) * HeroRotationDB.GUISettings["Scaling.ScaleUI"]
+  HR.LeftIconFrame:OverlayText(Text, FontScale)
   return false
 end
 
