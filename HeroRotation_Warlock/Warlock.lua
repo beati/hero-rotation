@@ -254,6 +254,8 @@ Item.Warlock.Commons = {
   FunhouseLens                          = Item(234217, {13, 14}),
   SignetofthePriory                     = Item(219308, {13, 14}),
   SpymastersWeb                         = Item(220202, {13, 14}),
+  -- Older Items
+  NeuralSynapseEnhancer                 = Item(168973, {13, 14}),
 }
 
 Item.Warlock.Affliction = MergeTableByKey(Item.Warlock.Commons, {

@@ -219,7 +219,7 @@ local function Cleave()
   if S.DireBeast:IsCastable() and (S.HuntmastersCall:IsAvailable() and Player:BuffStack(S.HuntmastersCallBuff) == 2) then
     if Cast(S.DireBeast, Settings.BeastMastery.GCDasOffGCD.DireBeast, nil, not Target:IsSpellInRange(S.DireBeast)) then return "dire_beast cleave 4"; end
   end
-  -- black_arrow,if=buff.beast_cleave.remains&buff.withering_fire.up
+  -- kill_shot,if=talent.black_arrow&buff.beast_cleave.remains&buff.withering_fire.up
   if S.BlackArrow:IsReady() and (Pet:BuffUp(S.BeastCleavePetBuff) and Player:BuffUp(S.WitheringFireBuff)) then
     if Cast(S.BlackArrow, nil, nil, not Target:IsSpellInRange(S.BlackArrow)) then return "black_arrow cleave 6"; end
   end
@@ -231,7 +231,7 @@ local function Cleave()
   if S.MultiShot:IsReady() and (Pet:BuffDown(S.BeastCleavePetBuff) and (not S.BloodyFrenzy:IsAvailable() or S.CalloftheWild:CooldownDown() or not CDsON())) then
     if Cast(S.MultiShot, nil, nil, not Target:IsSpellInRange(S.MultiShot)) then return "multishot cleave 10"; end
   end
-  -- black_arrow,if=buff.beast_cleave.remains
+  -- kill_shot,if=talent.black_arrow&buff.beast_cleave.remains
   if S.BlackArrow:IsReady() and (Pet:BuffUp(S.BeastCleavePetBuff)) then
     if Cast(S.BlackArrow, nil, nil, not Target:IsSpellInRange(S.BlackArrow)) then return "black_arrow cleave 12"; end
   end
@@ -290,7 +290,7 @@ local function ST()
   if CDsON() and S.BestialWrath:IsCastable() then
     if Cast(S.BestialWrath, Settings.BeastMastery.GCDasOffGCD.BestialWrath) then return "bestial_wrath st 4"; end
   end
-  -- black_arrow,if=buff.withering_fire.up
+  -- kill_shot,if=talent.black_arrow&buff.withering_fire.up
   if S.BlackArrow:IsReady() and (Player:BuffUp(S.WitheringFireBuff)) then
     if Cast(S.BlackArrow, nil, nil, not Target:IsSpellInRange(S.BlackArrow)) then return "black_arrow st 6"; end
   end
@@ -314,7 +314,7 @@ local function ST()
   if S.KillCommand:IsReady() then
     if Cast(S.KillCommand, nil, nil, not Target:IsSpellInRange(S.KillCommand)) then return "kill_command st 16"; end
   end
-  -- black_arrow
+  -- kill_shot,if=talent.black_arrow
   if S.BlackArrow:IsReady() then
     if Cast(S.BlackArrow, nil, nil, not Target:IsSpellInRange(S.BlackArrow)) then return "black_arrow st 18"; end
   end
@@ -436,7 +436,7 @@ local function APL()
   end
 
   if Everyone.TargetIsValid() then
-    -- Out of Combat
+    -- Precombat
     if not Player:AffectingCombat() then
       local ShouldReturn = Precombat(); if ShouldReturn then return ShouldReturn; end
     end
@@ -480,7 +480,7 @@ local function OnInit ()
   S.SerpentStingDebuff:RegisterAuraTracking()
 
   HR.Print("Beast Mastery can use pet abilities to better determine AoE. Make sure you have Growl and Blood Bolt / Bite / Claw / Smack on your player action bars.")
-  HR.Print("Beast Mastery Hunter rotation has been updated for patch 11.1.0.")
+  HR.Print("Beast Mastery Hunter rotation has been updated for patch 11.1.5.")
 end
 
 HR.SetAPL(253, APL, OnInit)

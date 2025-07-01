@@ -81,8 +81,9 @@ Spell.Warrior.Commons = {
   MarkofFyralathDebuff                  = Spell(414532),
   RavagerDebuff                         = Spell(228920), -- Dummy Debuff entry. Actually handled in Events.
   ThunderousRoarDebuff                  = Spell(397364),
-  -- Pool
+  -- Pool/Custom
   Pool                                  = Spell(999910),
+  ExecuteSwap                           = Spell(363653),
 }
 
 Spell.Warrior.Colossus = {
@@ -148,7 +149,7 @@ Spell.Warrior.Arms = MergeTableByKey(Spell.Warrior.Commons, {
   CollateralDamageBuff                  = Spell(334783),
   JuggernautBuff                        = Spell(383290),
   LethalBlowsBuff                       = Spell(455485), -- TWW S1 4pc
-  MartialProwessBuff                    = Spell(7384),
+  OverpowerBuff                         = Spell(7384),
   MercilessBonegrinderBuff              = Spell(383316),
   PayThemBackBuff                       = Spell(1216556), -- TWW S2 4pc
   StrikeVulnerabilitiesBuff             = Spell(394173),
@@ -280,4 +281,5 @@ Item.Warrior.Arms = MergeTableByKey(Item.Warrior.Commons, {
 })
 
 Item.Warrior.Protection = MergeTableByKey(Item.Warrior.Commons, {
+  TomeofLightsDevotion                   = Item(219309, {13, 14}),
 })

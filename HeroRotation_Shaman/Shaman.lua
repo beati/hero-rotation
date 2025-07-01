@@ -53,6 +53,7 @@ Spell.Shaman.Commons = {
   NaturesSwiftness                      = Spell(378081),
   PrimordialWave                        = Spell(375982),
   SpiritwalkersGrace                    = Spell(79206),
+  SplinteredElements                    = Spell(382042),
   TotemicRecall                         = Spell(108285),
   WindShear                             = Spell(57994),
   -- Buffs
@@ -144,7 +145,6 @@ Spell.Shaman.Elemental = MergeTableByKey(Spell.Shaman.Commons, {
   PrimalElementalist                    = Spell(117013),
   SearingFlames                         = Spell(381782),
   SkybreakersFieryDemise                = Spell(378310),
-  SplinteredElements                    = Spell(382042),
   StormElemental                        = Spell(192249),
   Stormkeeper                           = Spell(191634),
   SurgeofPower                          = Spell(262303),
@@ -209,6 +209,7 @@ Spell.Shaman.Enhancement = MergeTableByKey(Spell.Shaman.Commons, {
   Stormstrike                           = Spell(17364),
   Sundering                             = Spell(197214),
   SwirlingMaelstrom                     = Spell(384359),
+  TempestStrikes                        = Spell(428071),
   ThorimsInvocation                     = Spell(384444),
   UnrelentingStorms                     = Spell(470490),
   UnrulyWinds                           = Spell(390288),
@@ -267,8 +268,11 @@ Item.Shaman.Enhancement = MergeTableByKey(Item.Shaman.Commons, {
 
 Item.Shaman.Elemental = MergeTableByKey(Item.Shaman.Commons, {
   -- TWW Trinkets
+  FunhouseLens                          = Item(234217, {13, 14}),
   HouseofCards                          = Item(230027, {13, 14}),
   SpymastersWeb                         = Item(220202, {13, 14}),
+  -- TWW Items
+  BestinSlotsCaster                     = Item(232805, {16}),
   -- TWW S2 Previous Expansion Items
   NeuralSynapseEnhancer                 = Item(168973, {16}),
 })
