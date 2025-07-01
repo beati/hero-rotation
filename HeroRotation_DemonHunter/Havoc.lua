@@ -287,6 +287,10 @@ local function SimplifiedFS()
     if Cast(S.SigilofDoom, nil, nil, not Target:IsInRange(30)) then return "sigil_of_flame simplified 28 (Normal)"; end
   end
 
+  if S.EssenceBreak:IsReady() and Player:BuffUp(S.MetamorphosisBuff) then
+    if Cast(S.EssenceBreak, Settings.Havoc.GCDasOffGCD.EssenceBreak, nil, not Target:IsInRange(10)) then return "essence_break fs_meta 20"; end
+  end
+
   if S.DeathSweep:IsReady() then
     if Cast(S.DeathSweep, nil, nil, not IsInMeleeRange(8)) then return "death_sweep"; end
   end
