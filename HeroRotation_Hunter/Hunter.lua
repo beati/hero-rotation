@@ -68,6 +68,7 @@ Spell.Hunter.Commons = {
   BloodFuryBuff                         = Spell(20572),
   DeathblowBuff                         = Spell(378770),
   JunkmaestrosBuff                      = Spell(1219661), -- Buff from Junkmaestro's Mega Magnet
+  LatentEnergyBuff                      = Spell(1239675), -- Buff from Unyielding Netherprism
   SeethingRageBuff                      = Spell(408835), -- Buff from Djaruun
   -- Debuffs
   HuntersMarkDebuff                     = Spell(257284),
@@ -82,7 +83,6 @@ Spell.Hunter.DarkRanger = {
   -- Abilities
   BlackArrow                            = Spell(466930),
   -- Talents
-  BlackArrowTalent                      = Spell(466932),
   BleakArrows                           = Spell(467749),
   BleakArrowsBMAbility                  = Spell(472084),
   BleakArrowsMMAbility                  = Spell(467914),
@@ -99,6 +99,8 @@ Spell.Hunter.DarkRanger = {
   WitheringFireReady                    = Spell(468075),
   -- Debuffs
   BlackArrowDebuff                      = Spell(468572),
+  -- Tier Set Buffs
+  BlightedQuiverBuff                    = Spell(1236975),
 }
 
 Spell.Hunter.PackLeader = {
@@ -171,6 +173,7 @@ Spell.Hunter.BeastMastery = MergeTableByKey(Spell.Hunter.Commons, {
   ScentofBlood                          = Spell(193532),
   SolitaryCompanion                     = Spell(474746),
   Stomp                                 = Spell(199530),
+  ThrilloftheHunt                       = Spell(257944),
   ThunderingHooves                      = Spell(459693),
   WildCall                              = Spell(185789),
   WildInstincts                         = Spell(378442),
@@ -185,6 +188,7 @@ Spell.Hunter.BeastMastery = MergeTableByKey(Spell.Hunter.Commons, {
   HuntersPreyBuff                       = Spell(378215),
   HuntmastersCallBuff                   = Spell(459731),
   SolitaryCompanionBuff                 = Spell(474751),
+  ThrilloftheHuntBuff                   = Spell(257946),
   -- Debuffs
   BarbedShotDebuff                      = Spell(217200),
   LacerationDebuff                      = Spell(459555), -- "laceration_driver"
@@ -203,9 +207,11 @@ Spell.Hunter.Marksmanship = MergeTableByKey(Spell.Hunter.Commons, {
   Bulletstorm                           = Spell(389019),
   Bullseye                              = Spell(204089),
   BurstingShot                          = Spell(186387),
+  CallingtheShots                       = Spell(260404),
   CarefulAim                            = Spell(260228),
   ChimaeraShot                          = Spell(342049),
   DoubleTap                             = Spell(260402),
+  FocusedAim                            = Spell(378767),
   Headshot                              = Spell(471363),
   InTheRhythm                           = Spell(407404),
   KillShot                              = Spell(53351),
@@ -239,6 +245,7 @@ Spell.Hunter.Marksmanship = MergeTableByKey(Spell.Hunter.Commons, {
   -- Buffs
   BombardmentBuff                       = Spell(386875),
   BulletstormBuff                       = Spell(389020),
+  BullseyeBuff                          = Spell(204090),
   DoubleTapBuff                         = Spell(260402),
   InTheRhythmBuff                       = Spell(407405),
   LockandLoadBuff                       = Spell(194594),
@@ -336,6 +343,7 @@ Item.Hunter.Commons = {
 }
 
 Item.Hunter.BeastMastery = MergeTableByKey(Item.Hunter.Commons, {
+  ArazsRitualForge                       = Item(242402, {13, 14}),
 })
 
 Item.Hunter.Marksmanship = MergeTableByKey(Item.Hunter.Commons, {
@@ -350,4 +358,6 @@ Item.Hunter.Survival = MergeTableByKey(Item.Hunter.Commons, {
   ImperfectAscendancySerum              = Item(225654, {13, 14}),
   MadQueensMandate                      = Item(212454, {13, 14}),
   SkardynsGrace                         = Item(133282, {13, 14}),
+  -- TWW Items
+  SpellstrikeWarplance                  = Item(242481, {16}),
 })

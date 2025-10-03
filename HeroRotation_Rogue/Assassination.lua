@@ -58,11 +58,12 @@ local I = Item.Rogue.Assassination
 local OnUseExcludeTrinkets = {
   I.AlgetharPuzzleBox:ID(),
   I.AshesoftheEmbersoul:ID(),
+  I.AstralGladiatorsBadge:ID(),
   I.BottledFlayedwingToxin:ID(),
   I.ImperfectAscendancySerum:ID(),
   I.JunkmaestrosMegaMagnet:ID(),
   I.MadQueensMandate:ID(),
-  I.SignetofthePriory:ID(),
+  I.SoleahsSecretTechnique:ID(),
   I.TreacherousTransmitter:ID(),
   I.UnyieldingNetherprism:ID()
 }
@@ -88,6 +89,10 @@ UpperLimitEnergy, CDSoon
 local TrinketSyncSlot = 0
 local TrinketItem1, TrinketItem2
 local EffectiveCPSpend
+
+-- Tier sets
+local TWW3FateboundHasTier2PC, TWW3FateboundHasTier4PC
+local TWW3DeathstalkerHasTier2PC, TWW3DeathstalkerHasTier4PC
 
 -- Equipment
 local VarTrinketFailures = 0
@@ -130,6 +135,10 @@ HL:RegisterForEvent(function()
   else
     S.ColdBlood = Spell(382245)
   end
+  TWW3FateboundHasTier2PC = Player:HeroTreeID() == 52 and Player:HasTier('TWW3', 2)
+  TWW3FateboundHasTier4PC = Player:HeroTreeID() == 52 and Player:HasTier('TWW3', 4)
+  TWW3DeathstalkerHasTier2PC = Player:HeroTreeID() == 53 and Player:HasTier('TWW3', 2)
+  TWW3DeathstalkerHasTier4PC = Player:HeroTreeID() == 53 and Player:HasTier('TWW3', 4)
 end, "SPELLS_CHANGED", "LEARNED_SPELL_IN_TAB", "PLAYER_LOGIN", "PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED")
 
 -- Interrupts
@@ -556,18 +565,16 @@ local function Vanish ()
   end
 
   -- # Don't Vanish if deathstalker's mark isn't up and we're at a finish condition
-  if Target:BuffDown(S.DeathStalkersMarkDebuff) and ComboPoints >= EffectiveCPSpend then
+  if S.DeathStalkersMark:IsAvailable() and Target:DebuffDown(S.DeathStalkersMarkDebuff) and ComboPoints >= EffectiveCPSpend then
     return
   end
 
   -- # Vanish to fish for Fateful Ending
-  -- actions.vanish+=/vanish,if=buff.cold_blood.up&buff.fatebound_coin_tails.stack>=1
-  -- &buff.fatebound_coin_heads.stack>=1|!buff.fatebound_lucky_coin.up&effective_combo_points>=variable.effective_spend_cp
-  -- &(buff.fatebound_coin_tails.stack>=5|buff.fatebound_coin_heads.stack>=5)
+  -- actions.vanish+=/vanish,if=dot.deathmark.ticking&buff.cold_blood.up&buff.fatebound_coin_tails.stack>=1
+  -- &buff.fatebound_coin_heads.stack>=1
   if S.Vanish:IsCastable() then
-    if Player:BuffUp(S.ColdBlood) and Player:BuffStack(S.FateboundCoinTails) >= 1
-      and Player:BuffStack(S.FateboundCoinHeads) >= 1 or Player:BuffDown(S.FateboundLuckyCoin) and ComboPoints >= EffectiveCPSpend
-      and (Player:BuffStack(S.FateboundCoinTails) >= 5 or Player:BuffStack(S.FateboundCoinHeads) >= 5) then
+    if Target:DebuffUp(S.Deathmark) and Player:BuffUp(S.ColdBlood) and Player:BuffStack(S.FateboundCoinTails) >= 1
+      and Player:BuffStack(S.FateboundCoinHeads) >= 1 then
       ShouldReturn = StealthMacro(S.Vanish)
       if ShouldReturn then
         return "Cast Vanish (Fateful Ending Fish)" .. ShouldReturn
@@ -648,6 +655,17 @@ local function UsableItems ()
   local BaseTrinketCondition = Target:DebuffUp(S.Rupture) and S.Deathmark:CooldownRemains() <= 2 and not S.Deathmark:IsReady()
     or Target:DebuffUp(S.Deathmark) or HL.BossFilteredFightRemains("<", 22)
 
+  -- actions.items+=/use_item,name=astral_gladiators_badge_of_ferocity,use_off_gcd=1,
+  -- if=dot.kingsbane.ticking|dot.deathmkark.ticking|(cooldown.kingsbane.remains>60|cooldown.deathmark.remains>60)
+  if I.AstralGladiatorsBadge:IsEquippedAndReady() then
+    if Target:DebuffUp(S.Kingsbane) or Target:DebuffUp(S.Deathmark)
+      or (S.Kingsbane:CooldownRemains() > 60 or S.Deathmark:CooldownRemains() > 60) then
+      if Cast(I.AstralGladiatorsBadge, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then
+        return "Astral Gladiators Badge";
+      end
+    end
+  end
+
   -- actions.items+=/use_item,name=treacherous_transmitter,use_off_gcd=1,if=variable.base_trinket_condition
   if I.TreacherousTransmitter:IsEquippedAndReady() and BaseTrinketCondition then
     if Cast(I.TreacherousTransmitter, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then
@@ -655,10 +673,16 @@ local function UsableItems ()
     end
   end
 
-  -- actions.items+=/use_item,name=unyielding_netherprism,use_off_gcd=1,if=dot.deathmark.ticking|fight_remains<=15
-  if I.UnyieldingNetherprism:IsEquippedAndReady() and BaseTrinketCondition then
-    if Cast(I.UnyieldingNetherprism, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then
-      return "Unyeilding Netherprism";
+  -- actions.items+=/use_item,name=unyielding_netherprism,use_off_gcd=1,if=dot.deathmark.ticking
+  -- &(buff.latent_energy.stack>=16|fight_remains<=90|(!trinket.2.cooldown.ready|!trinket.1.cooldown.ready))|fight_remains<=20
+  if I.UnyieldingNetherprism:IsEquippedAndReady() then
+    if Target:DebuffUp(S.Deathmark) and
+      (Player:BuffStack(S.LatentEnergyBuff) >= 16 or HL.BossFilteredFightRemains('<=', 90)
+      or (not TrinketItem2:IsReady() or not TrinketItem1:IsReady()))
+      or HL.BossFilteredFightRemains('<=', 20) then
+      if Cast(I.UnyieldingNetherprism, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then
+        return "Unyeilding Netherprism";
+      end
     end
   end
 
@@ -674,7 +698,7 @@ local function UsableItems ()
   -- actions.items+=/use_item,name=junkmaestros_mega_magnet,if=cooldown.deathmark.remains>=30&!dot.deathmark.ticking
   -- &!debuff.shiv.up&(!talent.deathstalkers_mark|buff.lingering_darkness.up&buff.junkmaestros_mega_magnet.stack>5)|fight_remains<=10
   if I.JunkmaestrosMegaMagnet:IsEquippedAndReady() and Player:BuffUp(S.JunkmaestrosBuff) then
-    if S.Deathmark:CooldownRemains() >= 30 and not Target:DebuffUp(S.Deathmark) and Player:BuffDown(S.ShivDebuff)
+    if S.Deathmark:CooldownRemains() >= 30 and Target:DebuffDown(S.Deathmark) and Player:BuffDown(S.ShivDebuff)
       and (not S.DeathStalkersMark:IsAvailable()
       or Player:BuffUp(S.LingeringDarknessBuff) and Player:BuffStack(S.JunkmaestrosBuff) > 5) or HL.BossFilteredFightRemains("<=", 10) then
       if Cast(I.JunkmaestrosMegaMagnet, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then
@@ -690,11 +714,11 @@ local function UsableItems ()
     end
   end
 
-  -- actions.items+=/use_items,slots=trinket1,if=(variable.trinket_sync_slot=1&(debuff.deathmark.up|dot.kingsbane.ticking)
+  -- actions.items+=/use_items,slots=trinket1,if=(variable.trinket_sync_slot=1&(debuff.deathmark.up)
   -- |(variable.trinket_sync_slot=2&!trinket.2.cooldown.ready&cooldown.deathmark.remains>20))|!variable.trinket_sync_slot|fight_remains<=20
   if TrinketItem1 and TrinketItem1:IsReady() then
     if not Player:IsItemBlacklisted(TrinketItem1) and not ValueIsInArray(OnUseExcludeTrinkets, TrinketItem1:ID())
-      and (TrinketSyncSlot == 1 and (S.Deathmark:AnyDebuffUp() or Target:DebuffUp(S.Kingsbane))
+      and (TrinketSyncSlot == 1 and (S.Deathmark:AnyDebuffUp())
       or (TrinketSyncSlot == 2 and not TrinketItem2:IsReady() and S.Deathmark:CooldownRemains() > 20))
       or TrinketSyncSlot == 0 or HL.BossFilteredFightRemains("<", 20) then
       if Cast(TrinketItem1, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then
@@ -703,11 +727,11 @@ local function UsableItems ()
     end
   end
 
-  -- actions.items+=/use_items,slots=trinket2,if=(variable.trinket_sync_slot=2&(debuff.deathmark.up|dot.kingsbane.ticking)
-  -- |(variable.trinket_sync_slot=1&!trinket.1.cooldown.ready&cooldown.deathmark.remains>20))|!variable.trinket_sync_slot|fight_remains<=20
+  -- actions.items+=/use_items,slots=trinket2,if=(variable.trinket_sync_slot=2&(debuff.deathmark.up)
+  --|(variable.trinket_sync_slot=1&!trinket.1.cooldown.ready&cooldown.deathmark.remains>20))|!variable.trinket_sync_slot|fight_remains<=20
   if TrinketItem2 and TrinketItem2:IsReady() then
     if not Player:IsItemBlacklisted(TrinketItem2) and not ValueIsInArray(OnUseExcludeTrinkets, TrinketItem2:ID())
-      and (TrinketSyncSlot == 2 and (S.Deathmark:AnyDebuffUp() or Target:DebuffUp(S.Kingsbane))
+      and (TrinketSyncSlot == 2 and (S.Deathmark:AnyDebuffUp())
       or (TrinketSyncSlot == 1 and not TrinketItem1:IsReady() and S.Deathmark:CooldownRemains() > 20))
       or TrinketSyncSlot == 0 or HL.BossFilteredFightRemains("<", 20) then
       if Cast(TrinketItem2, nil, Settings.CommonsDS.DisplayStyle.Trinkets) then
@@ -728,16 +752,19 @@ local function ShivUsage ()
   local ShivKingsbaneCondition = S.Kingsbane:IsAvailable() and Player:BuffUp(S.Envenom) and ShivCondition
 
   -- # Shiv for Fatebound Edge Case Coins Before Deathmark + Kingsbane with new Tier Set
-  --actions.shiv+=/shiv,if=talent.lightweight_shiv&variable.shiv_kingsbane_condition&cooldown.deathmark.ready
-  -- &cooldown.kingsbane.ready&set_bonus.tww3_fatebound_2pc
-  if S.LightweightShiv:IsAvailable() and ShivKingsbaneCondition and S.Deathmark:IsReady() and S.Kingsbane:IsReady()
-    and Player:HasTier("TWW3", 2) then
-    if Cast(S.Shiv, Settings.Assassination.GCDasOffGCD.Shiv) then
-      return "Cast Shiv (FB Edge Case Coins)"
-    end
-  end
-
+  -- actions.shiv+=/shiv,if=talent.lightweight_shiv&variable.shiv_kingsbane_condition
+    -- &(cooldown.deathmark.ready|cooldown.deathmark.remains<=1)
+    -- &(cooldown.kingsbane.ready|cooldown.kingsbane.remains<=2)&set_bonus.tww3_fatebound_2pc
   if S.Shiv:IsReady() then
+    if S.LightweightShiv:IsAvailable() and ShivKingsbaneCondition
+      and (S.Deathmark:IsReady() or S.Deathmark:CooldownRemains() <= 2)
+      and (S.Kingsbane:IsReady() or S.Kingsbane:CooldownRemains() <= 3)
+      and TWW3FateboundHasTier2PC then
+      if Cast(S.Shiv, Settings.Assassination.GCDasOffGCD.Shiv) then
+        return "Cast Shiv (FB Edge Case Coins)"
+      end
+    end
+
     -- # Shiv for aoe with Arterial Precision
     -- actions.shiv+=/shiv,if=talent.arterial_precision&!debuff.shiv.up&dot.garrote.ticking
     -- &dot.rupture.ticking&spell_targets.fan_of_knives>=4&dot.crimson_tempest.ticking
@@ -752,12 +779,12 @@ local function ShivUsage ()
 
     -- # Single-charge Shiv case for Kingsbane
     -- actions.shiv+=/shiv,if=!talent.lightweight_shiv.enabled&variable.shiv_kingsbane_condition
-    -- &(dot.kingsbane.ticking&dot.kingsbane.remains<(8+2*set_bonus.tww3_deathstalker_4pc)|!dot.kingsbane.ticking
+    -- &(dot.kingsbane.ticking&dot.kingsbane.remains<(8+3*set_bonus.tww3_deathstalker_4pc)|!dot.kingsbane.ticking
     -- &cooldown.kingsbane.remains>=20)&(!talent.crimson_tempest.enabled|variable.single_target|dot.crimson_tempest.ticking)
     if not S.LightweightShiv:IsAvailable() then
       if ShivKingsbaneCondition
-        and (Target:DebuffUp(S.Kingsbane) and Target:DebuffRemains(S.Kingsbane) < (8+2*BoolToInt(Player:HasTier("TWW3", 4)))
-        or not Target:DebuffUp(S.Kingsbane) and S.Kingsbane:CooldownRemains() >= 20)
+        and (Target:DebuffUp(S.Kingsbane) and Target:DebuffRemains(S.Kingsbane) < (8+3*BoolToInt(TWW3DeathstalkerHasTier4PC))
+        or Target:DebuffDown(S.Kingsbane) and S.Kingsbane:CooldownRemains() >= 20)
         and (not S.CrimsonTempest:IsAvailable() or SingleTarget or Target:DebuffUp(S.CrimsonTempest)) then
         if Cast(S.Shiv, Settings.Assassination.GCDasOffGCD.Shiv) then
           return "Cast Shiv (Kingsbane)"
@@ -775,12 +802,13 @@ local function ShivUsage ()
 
     -- # Double-charge Shiv case for Kingsbane
     -- actions.shiv+=/shiv,if=talent.lightweight_shiv.enabled&variable.shiv_kingsbane_condition
-    -- &(dot.kingsbane.ticking&dot.kingsbane.remains<(8+2*set_bonus.tww3_deathstalker_4pc)
+    -- &(dot.kingsbane.ticking&dot.kingsbane.remains<(8+3*set_bonus.tww3_deathstalker_4pc)
     -- &dot.kingsbane.remains>4|cooldown.kingsbane.remains<=1&cooldown.shiv.charges_fractional>=1.7)
     if S.LightweightShiv:IsAvailable() then
       if ShivKingsbaneCondition
-        and (Target:DebuffUp(S.Kingsbane) and Target:DebuffRemains(S.Kingsbane) < (8+2*BoolToInt(Player:HasTier("TWW3", 4)))
-        and Target:DebuffRemains(S.Kingsbane) > 4 or S.Kingsbane:CooldownRemains() <= 1 and S.Shiv:ChargesFractional() >= 1.7) then
+        and (Target:DebuffUp(S.Kingsbane) and Target:DebuffRemains(S.Kingsbane) < (8+3*BoolToInt(TWW3DeathstalkerHasTier4PC))
+        and Target:DebuffRemains(S.Kingsbane) > 4 or S.Kingsbane:CooldownRemains() <= 1 and S.Shiv:ChargesFractional() >= 1.7)
+        and (S.Deathmark:IsReady() or S.Deathmark:CooldownRemains() >= 30) then
         if Cast(S.Shiv, Settings.Assassination.GCDasOffGCD.Shiv) then
           return "Cast Shiv (Double-charge Shiv case for Kingsbane)"
         end
@@ -802,7 +830,7 @@ local function ShivUsage ()
     if not S.Deathmark:AnyDebuffUp() and not S.Kingsbane:IsAvailable() and ShivCondition and (Target:DebuffUp(S.CrimsonTempest) or S.AmplifyingPoison:IsAvailable())
       and (((num(S.LightweightShiv:IsAvailable()) + 1) - S.Shiv:ChargesFractional()) * 30 < S.Deathmark:CooldownRemains()) then
       if Cast(S.Shiv, Settings.Assassination.GCDasOffGCD.Shiv) then
-        return "Cast Shiv"
+        return "Cast Shiv (Fallback)"
       end
     end
 
@@ -811,13 +839,13 @@ local function ShivUsage ()
     if not S.Kingsbane:IsAvailable() and not S.ArterialPrecision:IsAvailable() and ShivCondition
       and (not S.CrimsonTempest:IsAvailable() or SingleTarget or Target:DebuffUp(S.CrimsonTempest)) then
       if Cast(S.Shiv, Settings.Assassination.GCDasOffGCD.Shiv) then
-        return "Cast Shiv"
+        return "Cast Shiv (No KB)"
       end
     end
 
     -- # Dump Shiv on fight end
-    -- actions.shiv+=/shiv,if=fight_remains<=cooldown.shiv.charges*(8+2*set_bonus.tww3_deathstalker_4pc)
-    if HL.BossFilteredFightRemains("<=", S.Shiv:Charges() * (8+2*BoolToInt(Player:HasTier("TWW3", 4)))) then
+    -- actions.shiv+=/shiv,if=fight_remains<=cooldown.shiv.charges*(8+3*set_bonus.tww3_deathstalker_4pc)
+    if HL.BossFilteredFightRemains("<=", S.Shiv:Charges() * (8+3*BoolToInt(TWW3DeathstalkerHasTier4PC))) then
       if Cast(S.Shiv, Settings.Assassination.GCDasOffGCD.Shiv) then
         return "Cast Shiv (End Fight)"
       end
@@ -895,8 +923,8 @@ local function CDs ()
   -- &(cooldown.deathmark.remains>=50-15*set_bonus.tww3_fatebound_4pc|dot.deathmark.ticking)|fight_remains<=15
   if S.Kingsbane:IsReady() then
     if (Target:DebuffUp(S.ShivDebuff) or S.Shiv:CooldownRemains() < 6) and (Player:BuffUp(S.Envenom) or MeleeEnemies10yCount > 1)
-      and (S.Deathmark:CooldownRemains() >= 50 - 15*BoolToInt(Player:HasTier("TWW3", 4)) or Target:DebuffUp(S.Deathmark)
-      or (DeathmarkCondition and S.Deathmark:IsReady())) or HL.BossFilteredFightRemains("<=", 15) then
+      and (S.Deathmark:CooldownRemains() >= 50 - 15*BoolToInt(TWW3FateboundHasTier4PC) or Target:DebuffUp(S.Deathmark))
+      or HL.BossFilteredFightRemains("<=", 15) then
       if Cast(S.Kingsbane, Settings.Assassination.GCDasOffGCD.Kingsbane) then
         return "Cast Kingsbane"
       end
@@ -904,12 +932,12 @@ local function CDs ()
   end
 
   -- # Use with shiv or in niche cases at the end of Kingsbane if not already up
-  --actions.cds+=/thistle_tea,if=!buff.thistle_tea.up&debuff.shiv.remains>=6|!buff.thistle_tea.up&dot.kingsbane.ticking
-  -- &dot.kingsbane.remains<=6|!buff.thistle_tea.up&fight_remains<=cooldown.thistle_tea.charges*6
+  -- actions.cds+=/thistle_tea,if=talent.darkest_night&(!buff.thistle_tea.up&debuff.shiv.remains>=6|!buff.thistle_tea.up
+  -- &dot.kingsbane.ticking&dot.kingsbane.remains<=6|!buff.thistle_tea.up&fight_remains<=cooldown.thistle_tea.charges*6)
   if S.ThistleTea:IsCastable() then
-    if Player:BuffDown(S.ThistleTea) and Target:DebuffRemains(S.ShivDebuff) >= 6
+    if S.DarkestNight:IsAvailable() and (Player:BuffDown(S.ThistleTea) and Target:DebuffRemains(S.ShivDebuff) >= 6
       or Player:BuffDown(S.ThistleTea) and Target:DebuffUp(S.Kingsbane) and Target:DebuffRemains(S.Kingsbane) <= 6
-      or Player:BuffDown(S.ThistleTea) and HL.BossFilteredFightRemains("<", S.ThistleTea:Charges() * 6) then
+      or Player:BuffDown(S.ThistleTea) and HL.BossFilteredFightRemains("<", S.ThistleTea:Charges() * 6)) then
       if Cast(S.ThistleTea, Settings.CommonsOGCD.OffGCDasOffGCD.ThistleTea) then
         return "Cast Thistle Tea"
       end
@@ -946,10 +974,10 @@ local function CDs ()
   -- actions.cds+=/cold_blood,use_off_gcd=1,if=(buff.fatebound_coin_tails.stack>0&buff.fatebound_coin_heads.stack>0)
   -- |debuff.shiv.up&(cooldown.deathmark.remains>50&!set_bonus.tww3_fatebound_4pc|dot.kingsbane.ticking
   -- &set_bonus.tww3_fatebound_4pc|!talent.inevitabile_end&effective_combo_points>=variable.effective_spend_cp)
-  if S.ColdBlood:IsReady() and Player:DebuffDown(S.ColdBlood) then
+  if S.ColdBlood:IsReady() and Player:BuffDown(S.ColdBlood) then
     if (Player:BuffStack(S.FateboundCoinTails) > 0 and Player:BuffStack(S.FateboundCoinHeads) > 0)
-      or Target:DebuffUp(S.ShivDebuff) and (S.Deathmark:CooldownRemains() > 50 and not Player:HasTier("TWW3", 4)
-      or Target:DebuffUp(S.Kingsbane) and Player:HasTier("TWW3", 4) or not S.InevitabileEnd:IsAvailable() and ComboPoints >= EffectiveCPSpend) then
+      or Target:DebuffUp(S.ShivDebuff) and (S.Deathmark:CooldownRemains() > 50 and not TWW3FateboundHasTier4PC
+      or Target:DebuffUp(S.Kingsbane) and TWW3FateboundHasTier4PC or not S.InevitabileEnd:IsAvailable() and ComboPoints >= EffectiveCPSpend) then
       if Cast(S.ColdBlood, Settings.CommonsOGCD.OffGCDasOffGCD.ColdBlood) then
         return "Cast Cold Blood"
       end
@@ -980,11 +1008,11 @@ local function Core_Dot()
   end
 
   -- # Maintain Rupture unless darkest night is up
-  -- actions.core_dot+=/rupture,if=effective_combo_points>=variable.effective_spend_cp&(pmultiplier<=1)
-  -- &refreshable&target.time_to_die-remains>(4+(talent.dashing_scoundrel*5)+(variable.regen_saturated*6))
+  -- actions.core_dot+=/rupture,if=combo_points>=variable.effective_spend_cp&(pmultiplier<=1)
+  -- &refreshable&!buff.cold_blood.up&target.time_to_die-remains>(4+(talent.dashing_scoundrel*5)+(variable.regen_saturated*6))
   -- &(!buff.darkest_night.up|talent.caustic_spatter&!debuff.caustic_spatter.up)
-  if S.Rupture:IsReady() and ComboPoints >= EffectiveCPSpend and (Player:BuffDown(S.DarkestNightBuff) or S.CausticSpatter:IsAvailable()
-    and not Target:DebuffUp(S.CausticSpatterDebuff)) then
+  if S.Rupture:IsReady() and ComboPoints >= EffectiveCPSpend and Player:BuffDown(S.ColdBlood) and
+    (Player:BuffDown(S.DarkestNightBuff) or S.CausticSpatter:IsAvailable() and Target:DebuffDown(S.CausticSpatterDebuff)) then
     if Evaluate_Rupture_Target(Target) and Rogue.CanDoTUnit(Target, RuptureDMGThreshold) then
       if CastPooling(S.Rupture, nil, nil, not TargetInMeleeRange) then
         return "Cast Rupture"
@@ -1012,7 +1040,7 @@ local function AoE_Dot ()
   -- actions.aoe_dot+=/crimson_tempest,target_if=min:remains,if=spell_targets>=2&variable.dot_finisher_condition
   -- &refreshable&target.time_to_die-remains>6&!buff.darkest_night.up
   if HR.AoEON() and S.CrimsonTempest:IsReady() and MeleeEnemies10yCount >= 2 and DotFinisherCondition
-    and not Player:BuffUp(S.DarkestNightBuff) then
+    and Player:BuffDown(S.DarkestNightBuff) then
     for _, CycleUnit in pairs(MeleeEnemies10y) do
       if IsDebuffRefreshable(CycleUnit, S.CrimsonTempest, CrimsonTempestThreshold)
         and CycleUnit:FilteredTimeToDie(">", 6) and not ValueIsInArray(CrimsonTempestIgnoreNPCs, CycleUnit:NPCID()) then
@@ -1037,7 +1065,7 @@ local function AoE_Dot ()
   -- &target.time_to_die>(7+(talent.dashing_scoundrel*5)+(variable.regen_saturated*6))&!buff.darkest_night.up
   if S.Rupture:IsReady() and HR.AoEON() then
     if DotFinisherCondition and (Target:DebuffDown(S.Kingsbane) or Player:BuffUp(S.ColdBlood))
-      and (not EnergyRegenSaturated or not ScentSaturated) and not Player:BuffUp(S.DarkestNightBuff) then
+      and (not EnergyRegenSaturated or not ScentSaturated) and Player:BuffDown(S.DarkestNightBuff) then
       local function EvaluateRuptureTarget(TargetUnit)
         return IsDebuffRefreshable(TargetUnit, S.Rupture, RuptureThreshold)
       end
@@ -1065,11 +1093,16 @@ end
 local function Direct ()
   -- # Direct Damage Abilities
 
+  -- # Various Checks to see if we need to use a generator
+  -- actions.direct+=/variable,name=use_filler,value=combo_points<=variable.effective_spend_cp&!variable.cd_soon
+  -- |variable.not_pooling|!variable.single_target
+  local UseFiller = ComboPoints <= EffectiveCPSpend and not CDSoon or NotPooling or not SingleTarget
+
   -- # Maintain Caustic Spatter
   -- actions.direct+=/variable,name=use_caustic_filler,value=talent.caustic_spatter&dot.rupture.ticking
   -- &(!debuff.caustic_spatter.up|debuff.caustic_spatter.remains<=2)&combo_points.deficit>=1&!variable.single_target
   local UseCausticFiller = S.CausticSpatter:IsAvailable() and Target:DebuffUp(S.Rupture)
-    and (not Target:DebuffUp(S.CausticSpatterDebuff) or Target:DebuffRemains(S.CausticSpatterDebuff) <= 2)
+    and (Target:DebuffDown(S.CausticSpatterDebuff) or Target:DebuffRemains(S.CausticSpatterDebuff) <= 2)
     and ComboPointsDeficit >= 1 and not SingleTarget
 
   -- actions.direct+=/mutilate,if=variable.use_caustic_filler
@@ -1090,7 +1123,7 @@ local function Direct ()
   -- actions.direct=envenom,if=!buff.darkest_night.up&combo_points>=variable.effective_spend_cp
   -- &(variable.not_pooling|debuff.amplifying_poison.stack>=20|!variable.single_target)
   if S.Envenom:IsCastable() and Player:BuffDown(S.DarkestNightBuff) and ComboPoints >= EffectiveCPSpend
-    and (NotPooling or Target:DebuffStack(S.AmplifyingPoisonDebuff) >= 20 or not SingleTarget) then
+    and (UseFiller or Target:DebuffStack(S.AmplifyingPoisonDebuff) >= 20 or not SingleTarget) then
     if CastPooling(S.Envenom, nil, not TargetInMeleeRange) then
       return "Cast Envenom 1"
     end
@@ -1104,18 +1137,30 @@ local function Direct ()
     end
   end
 
-  -- # Various Checks to see if we need to use a generator
-  -- actions.direct+=/variable,name=use_filler,value=combo_points<=variable.effective_spend_cp&!variable.cd_soon
-  -- |variable.not_pooling|!variable.single_target
-  local UseFiller = ComboPoints < EffectiveCPSpend and not CDSoon or NotPooling or not SingleTarget
+  -- # Ambush on Blindside/Subterfuge. Do not use Ambush from stealth during Kingsbane & Deathmark if possible.
+  -- actions.direct+=/ambush,if=variable.use_filler&(buff.blindside.up|stealthed.rogue)&(!dot.kingsbane.ticking|debuff.deathmark.down|buff.blindside.up)
+  if (S.Ambush:IsCastable() or S.AmbushOverride:IsReady()) and ComboPoints < EffectiveCPSpend and (Player:BuffUp(S.BlindsideBuff) or Player:StealthUp(true, false))
+    and (Target:DebuffDown(S.Kingsbane) or Target:DebuffDown(S.Deathmark) or Player:BuffUp(S.BlindsideBuff)) then
+    if CastPooling(S.Ambush, nil, not TargetInMeleeRange) then
+      return "Cast Ambush"
+    end
+  end
 
-  -- actions.direct+=/variable,name=fok_target_count,value=(buff.clear_the_witnesses.up
-  -- &(spell_targets.fan_of_knives>=2-(buff.lingering_darkness.up|!talent.vicious_venoms)))
-  -- |(spell_targets.fan_of_knives>=3-(talent.momentum_of_despair&talent.thrown_precision)+talent.vicious_venoms+talent.blindside)
-  local FOKTargetCount = (Player:BuffUp(S.ClearTheWitnessesBuff)
-    and (MeleeEnemies10yCount >= 2 - num(Player:BuffUp(S.LingeringDarknessBuff) or not S.ViciousVenoms:IsAvailable())))
-    or (MeleeEnemies10yCount >= 3 - num(S.MomentumOfDespair:IsAvailable() and S.ThrownPrecision:IsAvailable())
-    + num(S.ViciousVenoms:IsAvailable()) + num(S.Blindside:IsAvailable()))
+  -- actions.direct+=/fan_of_knives,if=buff.clear_the_witnesses.up
+  -- &(spell_targets.fan_of_knives>=2-(buff.lingering_darkness.up|!talent.vicious_venoms))
+  if S.FanofKnives:IsCastable() then
+    if Player:BuffUp(S.ClearTheWitnessesBuff)
+      and (MeleeEnemies10yCount >= 2 - num(Player:BuffUp(S.LingeringDarknessBuff) or not S.ViciousVenoms:IsAvailable())) then
+      if CastPooling(S.FanofKnives, nil, not TargetInMeleeRange) then
+        return "Cast Fan of Knives"
+      end
+    end
+  end
+
+  -- actions.direct+=/variable,name=fok_target_count,value=spell_targets.fan_of_knives>=3-(talent.momentum_of_despair
+  -- &talent.thrown_precision)+talent.vicious_venoms+talent.blindside
+  local FOKTargetCount = MeleeEnemies10yCount >= 3 - num(S.MomentumOfDespair:IsAvailable() and S.ThrownPrecision:IsAvailable())
+    + num(S.ViciousVenoms:IsAvailable()) + num(S.Blindside:IsAvailable())
 
   -- # Fan of Knives at 6cp for special case Darkest Night
   -- actions.direct+=/fan_of_knives,if=buff.darkest_night.up&combo_points=6&(!talent.vicious_venoms|spell_targets.fan_of_knives>=2)
@@ -1136,15 +1181,6 @@ local function Direct ()
     end
   end
 
-  -- # Ambush on Blindside/Subterfuge. Do not use Ambush from stealth during Kingsbane & Deathmark if possible.
-  -- actions.direct+=/ambush,if=variable.use_filler&(buff.blindside.up|stealthed.rogue)&(!dot.kingsbane.ticking|debuff.deathmark.down|buff.blindside.up)
-  if (S.Ambush:IsCastable() or S.AmbushOverride:IsReady()) and UseFiller and (Player:BuffUp(S.BlindsideBuff) or Player:StealthUp(true, false))
-    and (Target:DebuffDown(S.Kingsbane) or Target:DebuffDown(S.Deathmark) or Player:BuffUp(S.BlindsideBuff)) then
-    if CastPooling(S.Ambush, nil, not TargetInMeleeRange) then
-      return "Cast Ambush"
-    end
-  end
-
   -- # Tab-Mutilate to apply Deadly Poison at 2 targets if not using Fan of Knives
   -- actions.direct+=/mutilate,target_if=!dot.deadly_poison_dot.ticking&!debuff.amplifying_poison.up,if=variable.use_filler&spell_targets.fan_of_knives=2
   if S.Mutilate:IsCastable() and UseFiller and MeleeEnemies10yCount == 2 and Target:DebuffDown(S.DeadlyPoisonDebuff, true)
@@ -1160,7 +1196,13 @@ local function Direct ()
     end
   end
 
-  -- # Fallback Mutilate if all else failsz
+  if S.Ambush:IsReady() and UseFiller then
+    if CastPooling(S.Ambush, nil,not TargetInMeleeRange) then
+      return "Cast Ambush (Filler)"
+    end
+  end
+
+  -- # Fallback Mutilate if all else fails
   -- actions.direct+=/mutilate,if=variable.use_filler
   if S.Mutilate:IsCastable() and UseFiller then
     if CastPooling(S.Mutilate, nil,not TargetInMeleeRange) then
@@ -1173,6 +1215,11 @@ end
 
 --- ======= MAIN =======
 local function APL ()
+  TWW3FateboundHasTier2PC = Player:HeroTreeID() == 52 and Player:HasTier('TWW3', 2)
+  TWW3FateboundHasTier4PC = Player:HeroTreeID() == 52 and Player:HasTier('TWW3', 4)
+  TWW3DeathstalkerHasTier2PC = Player:HeroTreeID() == 53 and Player:HasTier('TWW3', 2)
+  TWW3DeathstalkerHasTier4PC = Player:HeroTreeID() == 53 and Player:HasTier('TWW3', 4)
+
   -- Enemies Update
   MeleeRange = 5
   AoERange = 10
@@ -1199,7 +1246,7 @@ local function APL ()
   RuptureDMGThreshold = S.Envenom:Damage() * Settings.Assassination.EnvenomDMGOffset; -- Used to check if Rupture is worth to be casted since it's a finisher.
   GarroteDMGThreshold = S.Mutilate:Damage() * Settings.Assassination.MutilateDMGOffset; -- Used as TTD Not Valid fallback since it's a generator.
   PriorityRotation = UsePriorityRotation()
-  EffectiveCPSpend = mathmax(Player:ComboPointsMax() - 2, 5 * num(S.HandOfFate:IsAvailable()))
+  EffectiveCPSpend = mathmax(Player:ComboPointsMax() - 2, 5)
 
   -- Defensives
   -- Crimson Vial
@@ -1234,7 +1281,7 @@ local function APL ()
     -- actions.precombat+=/food
     -- actions.precombat+=/snapshot_stats
     -- actions.precombat+=/stealth
-    if not Player:BuffUp(Rogue.VanishBuffSpell()) then
+    if Player:BuffDown(Rogue.VanishBuffSpell()) then
       ShouldReturn = Rogue.Stealth(Rogue.StealthSpell())
       if ShouldReturn then
         return ShouldReturn
@@ -1259,20 +1306,19 @@ local function APL ()
 
     -- # Pooling Setup, check for cooldowns
     -- actions+=/variable,name=in_cooldowns,value=dot.kingsbane.ticking|debuff.shiv.up
-    InCooldowns = Target:DebuffUp(S.Kingsbane) or Target:DebuffUp(S.Shiv)
+    InCooldowns = Target:DebuffUp(S.Kingsbane) or Target:DebuffUp(S.ShivDebuff)
 
     -- # Check upper bounds of energy to begin spending
     -- actions+=/variable,name=upper_limit_energy,value=energy.pct>=(80-10*talent.vicious_venoms.rank-30*talent.amplifying_poison)
     UpperLimitEnergy = Player:EnergyPercentage() >= (80 - 10 * S.ViciousVenoms:TalentRank() - 30 * num(S.AmplifyingPoison:IsAvailable()))
 
     -- # Checking for cooldowns soon
-    -- actions+=/variable,name=cd_soon,value=cooldown.kingsbane.remains<3&!cooldown.kingsbane.ready
-    CDSoon = S.Kingsbane:CooldownRemains() < 3 and not S.Kingsbane:IsReady()
+    -- actions+=/variable,name=cd_soon,value=talent.kingsbane&cooldown.kingsbane.remains<3&!cooldown.kingsbane.ready
+    CDSoon = S.Kingsbane:IsAvailable() and S.Kingsbane:CooldownRemains() < 3 and not S.Kingsbane:IsReady()
 
     -- # Pooling Condition all together
     -- actions+=/variable,name=not_pooling,value=variable.in_cooldowns|buff.darkest_night.up|variable.upper_limit_energy|fight_remains<=20
-    NotPooling = InCooldowns or Player:BuffUp(S.DarkestNightBuff)
-      or UpperLimitEnergy or HL.BossFilteredFightRemains("<=", 20)
+    NotPooling = InCooldowns or Player:BuffUp(S.DarkestNightBuff) or UpperLimitEnergy or HL.BossFilteredFightRemains("<=", 20)
 
     ScentSaturated = ScentSaturatedVar()
 

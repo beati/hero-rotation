@@ -54,6 +54,8 @@ Spell.Evoker.Commons = {
   ScarletAdaptationBuff                 = Spell(372470),
   SourceofMagicBuff                     = Spell(369459),
   TipTheScalesBuff                      = Spell(370553),
+  -- TWW S3 Tier Buffs
+  InnerFlameBuff                        = Spell(1236776), -- Flameshaper 2pc
   -- DF Trinket Effects
   SpoilsofNeltharusCrit                 = Spell(381954),
   SpoilsofNeltharusHaste                = Spell(381955),
@@ -218,6 +220,7 @@ Item.Evoker.Augmentation = MergeTableByKey(Item.Evoker.Commons, {
   -- TWW Trinkets
   AberrantSpellforge                    = Item(212451, {13, 14}),
   ConcoctionKissofDeath                 = Item(215174, {13, 14}),
+  DiamantineVoidcore                    = Item(242392, {13, 14}),
   FlarendosPilotLight                   = Item(230191, {13, 14}),
   OvinaxsMercurialEgg                   = Item(220305, {13, 14}),
   TreacherousTransmitter                = Item(221023, {13, 14}),

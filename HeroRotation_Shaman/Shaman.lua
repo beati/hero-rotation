@@ -82,6 +82,10 @@ Spell.Shaman.Farseer = {
   CalloftheAncestors                    = Spell(443450),
   ElementalReverb                       = Spell(443418),
   PrimordialCapacity                    = Spell(443448),
+  -- Buffs
+  AncestralSwiftnessBuff                = Spell(443454),
+  AncestralWisdomBuff                   = Spell(1238279), -- TWW S3 4pc Buff
+  CalloftheAncestorsBuff                = Spell(447244),
 }
 
 Spell.Shaman.Stormbringer = {
@@ -134,6 +138,7 @@ Spell.Shaman.Elemental = MergeTableByKey(Spell.Shaman.Commons, {
   FluxMelting                           = Spell(381776),
   FuryoftheStorms                       = Spell(191717),
   FusionofElements                      = Spell(462840),
+  HeraldoftheStorms                     = Spell(468571),
   Icefury                               = Spell(210714),
   ImprovedFlametongueWeapon             = Spell(382027),
   LightningRod                          = Spell(210689),
@@ -261,9 +266,11 @@ Item.Shaman.Commons = {
 Item.Shaman.Enhancement = MergeTableByKey(Item.Shaman.Commons, {
   -- DF Trinkets
   AlgetharPuzzleBox                     = Item(193701, {13, 14}),
-  BeacontotheBeyond                     = Item(203963, {13, 14}),
+  BeaconToTheBeyond                     = Item(203963, {13, 14}),
   ElementiumPocketAnvil                 = Item(202617, {13, 14}),
   ManicGrieftorch                       = Item(194308, {13, 14}),
+  -- TWW Trinkets
+  UnyieldingNetherprism                 = Item(242396, {13, 14}),
 })
 
 Item.Shaman.Elemental = MergeTableByKey(Item.Shaman.Commons, {

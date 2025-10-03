@@ -17,6 +17,7 @@ local num            = HR.Commons.Everyone.num
 local SpellHavoc     = Spell.DemonHunter.Havoc
 local SpellVengeance = Spell.DemonHunter.Vengeance
 -- Lua
+local mathmax        = math.max
 -- WoW API
 
 --- ============================ CONTENT ============================
@@ -56,6 +57,17 @@ HavocOldBuffUp = HL.AddCoreOverride ("Player.BuffUp",
   end
 , 577)
 
+local HavocOldBuffDown
+HavocOldBuffDown = HL.AddCoreOverride ("Player.BuffDown",
+  function (self, Spell, AnyCaster, BypassRecovery)
+    if Spell == SpellHavoc.ImmolationAuraBuff then
+      return not Player:BuffUp(SpellHavoc.ImmolationAuraBuff)
+    else
+      return HavocOldBuffDown(self, Spell, AnyCaster, BypassRecovery)
+    end
+  end
+, 577)
+
 local HavocOldBuffStack
 HavocOldBuffStack = HL.AddCoreOverride ("Player.BuffStack",
   function (self, Spell, AnyCaster, BypassRecovery)
@@ -67,12 +79,27 @@ HavocOldBuffStack = HL.AddCoreOverride ("Player.BuffStack",
   end
 , 577)
 
+local HavocOldBuffRemains
+HavocOldBuffRemains = HL.AddCoreOverride ("Player.BuffRemains",
+  function (self, Spell, AnyCaster, BypassRecovery)
+    if Spell == SpellHavoc.ImmolationAuraBuff then
+      return mathmax(HavocOldBuffRemains(self, SpellHavoc.ImmolationAuraBuff1, AnyCaster, BypassRecovery), HavocOldBuffRemains(self, SpellHavoc.ImmolationAuraBuff2, AnyCaster, BypassRecovery), HavocOldBuffRemains(self, SpellHavoc.ImmolationAuraBuff3, AnyCaster, BypassRecovery), HavocOldBuffRemains(self, SpellHavoc.ImmolationAuraBuff4, AnyCaster, BypassRecovery), HavocOldBuffRemains(self, SpellHavoc.ImmolationAuraBuff5, AnyCaster, BypassRecovery))
+    else
+      return HavocOldBuffRemains(self, Spell, AnyCaster, BypassRecovery)
+    end
+  end
+, 577)
+
 HL.AddCoreOverride ("Player.Demonsurge",
   function(self, Buff)
-    if DH.Demonsurge[Buff] ~= nil then
-      return DH.Demonsurge[Buff]
+    if Buff == "Hardcast" then
+      return SpellHavoc.AbyssalGaze:IsLearned()
     else
-      return false
+      if DH.Demonsurge[Buff] ~= nil then
+        return DH.Demonsurge[Buff]
+      else
+        return false
+      end
     end
   end
 , 577)

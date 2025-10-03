@@ -68,6 +68,7 @@ Spell.Druid.Commons = {
   HeartoftheWildBuff                    = Spell(319454),
   InnerResilienceBuff                   = Spell(450706),
   IronfurBuff                           = Spell(192081),
+  LatentEnergyBuff                      = Spell(1239675), -- Buff from Unyielding Netherprism
   MarkoftheWildBuff                     = Spell(1126),
   PoPHealBuff                           = Spell(395336),
   SpymastersReportBuff                  = Spell(451199), -- Stacking buff from before using Spymaster's Web trinket
@@ -90,10 +91,12 @@ Spell.Druid.DruidoftheClaw = {
   -- Talents
   EmpoweredShapeshifting                = Spell(441689),
   FountofStrength                       = Spell(441675),
+  KillingStrikes                        = Spell(441824),
   Ravage                                = Spell(441583),
   WildpowerSurge                        = Spell(441691),
   -- Buffs
   FelinePotentialBuff                   = Spell(441701),
+  KillingStrikesCombatBuff              = Spell(441827),
   RavageBuffFeral                       = Spell(441585),
   RavageBuffGuardian                    = Spell(441602),
 }
@@ -108,11 +111,13 @@ Spell.Druid.ElunesChosen = {
 
 Spell.Druid.KeeperoftheGrove = {
   -- Talents
+  BounteousBloom                        = Spell(429215),
   ControloftheDream                     = Spell(434249),
   EarlySpring                           = Spell(428937),
   PoweroftheDream                       = Spell(434220),
   TreantsoftheMoon                      = Spell(428544),
   -- Buffs
+  DryadsFavorBuff                       = Spell(1236807), -- TWW S3 4pc Buff
   HarmonyoftheGroveBuff                 = Spell(428735),
 }
 
@@ -145,6 +150,7 @@ Spell.Druid.Balance = MergeTableByKey(Spell.Druid.Commons, {
   OrbitalStrike                         = Spell(390378),
   PowerofGoldrinn                       = Spell(394046),
   PrimordialArcanicPulsar               = Spell(393960),
+  RadiantMoonlight                      = Spell(394121),
   RattletheStars                        = Spell(393954),
   Solstice                              = Spell(343647),
   SouloftheForest                       = Spell(114107),
@@ -174,6 +180,7 @@ Spell.Druid.Balance = MergeTableByKey(Spell.Druid.Commons, {
   IncarnationBuff1                      = Spell(102560),
   IncarnationBuff2                      = Spell(390414),
   PAPBuff                               = Spell(393961),
+  PartingsSkiesBuff                     = Spell(395110),
   RattledStarsBuff                      = Spell(393955),
   SolsticeBuff                          = Spell(343648),
   StarfallBuff                          = Spell(191034),
@@ -290,6 +297,7 @@ Spell.Druid.Guardian = MergeTableByKey(Spell.Druid.Guardian, Spell.Druid.ElunesC
 if not Item.Druid then Item.Druid = {} end
 Item.Druid.Commons = {
   -- TWW Trinkets
+  ArazsRitualForge                      = Item(242402, {13, 14}),
   ImperfectAscendancySerum              = Item(225654, {13, 14}),
   OvinaxsMercurialEgg                   = Item(220305, {13, 14}),
   TreacherousTransmitter                = Item(221023, {13, 14}),
@@ -313,9 +321,11 @@ Item.Druid.Balance = MergeTableByKey(Item.Druid.Commons, {
 Item.Druid.Feral = MergeTableByKey(Item.Druid.Commons, {
   -- TWW Trinkets
   ConcoctionKissofDeath                 = Item(215174, {13, 14}),
+  CursedStoneIdol                       = Item(246344, {13, 14}),
   JunkmaestrosMegaMagnet                = Item(230189, {13, 14}),
   SikransEndlessArsenal                 = Item(212449, {13, 14}),
   TwinFangInstruments                   = Item(219319, {13, 14}),
+  UnyieldingNetherprism                 = Item(242396, {13, 14}),
 })
 
 Item.Druid.Guardian = MergeTableByKey(Item.Druid.Commons, {

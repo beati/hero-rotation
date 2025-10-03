@@ -62,6 +62,7 @@ HR.GUISettings.APL.DemonHunter = {
     },
     GCDasOffGCD = {
       -- Abilities
+      ChaosNova = true,
       EssenceBreak = false,
       FelBarrage = false,
       EyeBeam = false,

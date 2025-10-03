@@ -32,11 +32,13 @@ HR.GUISettings.APL.Monk = {
       Trinkets = "Suggested",
       -- Class Specific
       Vivify = "Suggested",
+      WeaponsOfOrder = "Suggested",
     },
   },
   CommonsOGCD = {
     -- {Display GCD as OffGCD, ForceReturn}
     GCDasOffGCD = {
+      ChiBurst = false,
       Paralysis = true,
       RingOfPeace = true,
       SummonWhiteTigerStatue = true,
@@ -106,7 +108,6 @@ HR.GUISettings.APL.Monk = {
       -- Racials
       -- Abilities
       EnergizingElixir = true,
-      Serenity = true,
       StormEarthAndFire = true,
     }
   },

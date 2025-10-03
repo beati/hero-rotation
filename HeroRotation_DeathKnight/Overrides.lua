@@ -66,7 +66,7 @@ HL.AddCoreOverride("Player.BonestormTicking",
 
 HL.AddCoreOverride("Player.DRWBPTicking",
   function (self)
-    return Player:BuffUp(SpellBlood.DancingRuneWeaponBuff) and SpellBlood.BloodBoil:TimeSinceLastCast() < SpellBlood.DancingRuneWeapon:TimeSinceLastCast()
+    return Player:BuffUp(SpellBlood.DancingRuneWeaponBuff) and (SpellBlood.BloodBoil:TimeSinceLastCast() < SpellBlood.DancingRuneWeapon:TimeSinceLastCast() or SpellBlood.DeathsCaress:TimeSinceLastCast() < SpellBlood.DancingRuneWeapon:TimeSinceLastCast())
   end
 , 250)
 
@@ -77,6 +77,18 @@ OldFrostIsCastable = HL.AddCoreOverride("Spell.IsCastable",
     local BaseCheck = OldFrostIsCastable(self, BypassRecovery, Range, AoESpell, ThisUnit, Offset)
     if self == SpellFrost.RaiseDead then
       return (not Pet:IsActive()) and BaseCheck
+    else
+      return BaseCheck
+    end
+  end
+, 251)
+
+local OldFrostBuffUp
+OldFrostBuffUp = HL.AddCoreOverride("Player.BuffUp",
+  function (self, Spell, AnyCaster, BypassRecovery)
+    local BaseCheck = OldFrostBuffUp(self, Spell, AnyCaster, BypassRecovery)
+    if Spell == SpellFrost.KillingMachineBuff then
+      return BaseCheck or DeathKnight.Exterminate
     else
       return BaseCheck
     end

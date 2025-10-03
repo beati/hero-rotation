@@ -51,6 +51,7 @@ Spell.DeathKnight.Commons = {
   DeathStrikeBuff                       = Spell(101568),
   EmpowerRuneWeaponBuff                 = Spell(47568),
   IcyTalonsBuff                         = Spell(194879),
+  LatentEnergyBuff                      = Spell(1239675), -- Buff from Unyielding Netherprism
   RuneofHysteriaBuff                    = Spell(326918),
   UnholyStrengthBuff                    = Spell(53365),
   -- Debuffs
@@ -114,6 +115,7 @@ Spell.DeathKnight.Sanlayn = {
   GiftoftheSanlaynBuff                  = Spell(434153),
   InflictionofSorrowBuff                = Spell(460049),
   VampiricStrikeBuff                    = Spell(433899),
+  VisceralStrengthUnholy                = Spell(1234532),
   -- Debuffs
   InciteTerrorDebuff                    = Spell(458478),
 }
@@ -167,17 +169,21 @@ Spell.DeathKnight.Frost = MergeTableByKey(Spell.DeathKnight.Commons, {
   Avalanche                             = Spell(207142),
   BitingCold                            = Spell(377056),
   Bonegrinder                           = Spell(377098),
-  BreathofSindragosa                    = Spell(152279),
+  BreathofSindragosa                    = Spell(1249658),
   ChillStreak                           = Spell(305392),
   ColdHeart                             = Spell(281208),
   EnduringStrength                      = Spell(377190),
+  Frostbane                             = Spell(455993),
+  FrostboundWill                        = Spell(1238680),
   Frostscythe                           = Spell(207230),
   FrostwyrmsFury                        = Spell(279302),
+  FrozenDominion                        = Spell(377226),
   GatheringStorm                        = Spell(194912),
   GlacialAdvance                        = Spell(194913),
   HornofWinter                          = Spell(57330),
   Icebreaker                            = Spell(392950),
-  Icecap                                = Spell(207126),
+  IcyOnslaught                          = Spell(1230272),
+  KillingStreak                         = Spell(1230153),
   Obliterate                            = Spell(49020),
   Obliteration                          = Spell(281238),
   PillarofFrost                         = Spell(51271),
@@ -191,9 +197,13 @@ Spell.DeathKnight.Frost = MergeTableByKey(Spell.DeathKnight.Commons, {
   -- Buffs
   BonegrinderFrostBuff                  = Spell(377103),
   ColdHeartBuff                         = Spell(281209),
+  FrostbaneBuff                         = Spell(1229310),
+  FrozenDominionBuff                    = Spell(1233152),
   GatheringStormBuff                    = Spell(211805),
+  IcyOnslaughtBuff                      = Spell(1230273),
   KillingMachineBuff                    = Spell(51124),
   PillarofFrostBuff                     = Spell(51271),
+  RemorselessWinterBuff                 = Spell(196770),
   RimeBuff                              = Spell(59052),
   UnleashedFrenzyBuff                   = Spell(376907),
   -- Debuffs
@@ -217,12 +227,14 @@ Spell.DeathKnight.Unholy = MergeTableByKey(Spell.DeathKnight.Commons, {
   CommanderoftheDead                    = Spell(390259),
   DarkTransformation                    = Spell(63560),
   Defile                                = Spell(152280),
+  Desecrate                             = Spell(1234559),
   DoomedBidding                         = Spell(455386),
   Epidemic                              = Spell(207317),
   FesteringStrike                       = Spell(85948),
   Festermight                           = Spell(377590),
   HarbingerofDoom                       = Spell(276023),
   ImprovedDeathCoil                     = Spell(377580),
+  LegionofSouls                         = Spell(383269),
   MenacingMagus                         = Spell(455135),
   Morbidity                             = Spell(377592),
   Outbreak                              = Spell(77575),
@@ -240,7 +252,9 @@ Spell.DeathKnight.Unholy = MergeTableByKey(Spell.DeathKnight.Commons, {
   -- Buffs
   CommanderoftheDeadBuff                = Spell(390260),
   FesteringScytheBuff                   = Spell(458123),
+  FesteringScytheStacksBuff             = Spell(459238),
   FestermightBuff                       = Spell(377591),
+  LegionofSoulsBuff                     = Spell(383269),
   RunicCorruptionBuff                   = Spell(51460),
   SuddenDoomBuff                        = Spell(81340),
   -- Debuffs
@@ -258,6 +272,7 @@ Spell.DeathKnight.Unholy = MergeTableByKey(Spell.DeathKnight.Unholy, Spell.Death
 if not Item.DeathKnight then Item.DeathKnight = {} end
 Item.DeathKnight.Commons = {
   -- TWW Trinkets
+  CursedStoneIdol                       = Item(246344, {13, 14}),
   FunhouseLens                          = Item(234217, {13, 14}),
   ImprovisedSeaforiumPacemaker          = Item(232541, {13, 14}),
   TreacherousTransmitter                = Item(221023, {13, 14}),

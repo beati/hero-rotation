@@ -29,6 +29,7 @@ Spell.DemonHunter.Commons = {
   Glide                                 = Spell(131347),
   -- Talents
   AuraofPain                            = Spell(207347),
+  ChaosFragments                        = Spell(320412),
   ChaosNova                             = Spell(179057),
   CollectiveAnguish                     = Spell(390152),
   Demonic                               = Spell(213410),
@@ -54,6 +55,7 @@ Spell.DemonHunter.Commons = {
   ExplosiveAdrenalineBuff               = Spell(1218713), -- Improvised Seaforium Pacemaker buff
   InnerResilienceBuff                   = Spell(450706),  -- Tome of Light's Devotion buff
   JunkmaestrosBuff                      = Spell(1219661), -- Junkmaestro's Mega Magnet buff
+  LatentEnergyBuff                      = Spell(1239675), -- Buff from Unyielding Netherprism
   -- Debuffs
   SigilofFlameDebuff                    = Spell(204598),
   SigilofMiseryDebuff                   = Spell(207685),
@@ -119,6 +121,7 @@ Spell.DemonHunter.Havoc = MergeTableByKey(Spell.DemonHunter.Commons, {
   ChaosTheory                           = Spell(389687),
   ChaoticTransformation                 = Spell(388112),
   CycleofHatred                         = Spell(258887),
+  DancingWithFate                       = Spell(389978),
   DemonBlades                           = Spell(203555),
   EssenceBreak                          = Spell(258860),
   EyeBeam                               = Spell(198013),
@@ -147,6 +150,7 @@ Spell.DemonHunter.Havoc = MergeTableByKey(Spell.DemonHunter.Commons, {
   -- Buffs
   ChaosTheoryBuff                       = Spell(390195),
   CycleofHatredBuff                     = Spell(1214887),
+  DemonSoulBuff                         = Spell(1238676), -- TWW S3 4pc Buff
   ExergyBuff                            = Spell(208628),
   FelBarrageBuff                        = Spell(258925),
   FuriousGazeBuff                       = Spell(343312),
@@ -216,18 +220,25 @@ Spell.DemonHunter.Vengeance = MergeTableByKey(Spell.DemonHunter.Vengeance, Spell
 if not Item.DemonHunter then Item.DemonHunter = {} end
 Item.DemonHunter.Commons = {
   -- TWW Trinkets
+  ArazsRitualForge                      = Item(242402, {13, 14}),
   Blastmaster3000                       = Item(234717, {13, 14}),
+  ChaoticNethergate                     = Item(246825, {13, 14}),
+  CursedStoneIdol                       = Item(246344, {13, 14}),
+  FunhouseLens                          = Item(234217, {13, 14}),
   GeargrindersSpareKeys                 = Item(230197, {13, 14}),
   HouseofCards                          = Item(230027, {13, 14}),
   ImprovisedSeaforiumPacemaker          = Item(232541, {13, 14}),
   JunkmaestrosMegaMagnet                = Item(230189, {13, 14}),
+  LilyoftheEternalWeave                 = Item(242494, {13, 14}),
   MadQueensMandate                      = Item(212454, {13, 14}),
   MisterLockNStalk                      = Item(230193, {13, 14}),
+  PerfidiousProjector                   = Item(242403, {13, 14}),
   RatfangToxin                          = Item(235359, {13, 14}),
   RavenousHoneyBuzzer                   = Item(219298, {13, 14}),
   SignetofthePriory                     = Item(219308, {13, 14}),
   TomeofLightsDevotion                  = Item(219309, {13, 14}),
   TreacherousTransmitter                = Item(221023, {13, 14}),
+  UnyieldingNetherprism                 = Item(242396, {13, 14}),
   -- TWW S2 Old Trinkets
   GrimCodex                             = Item(178811, {13, 14}),
   SkardynsGrace                         = Item(133282, {13, 14}),

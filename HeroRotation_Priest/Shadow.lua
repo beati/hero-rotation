@@ -44,6 +44,7 @@ local OnUseExcludes = {
   I.FlarendosPilotLight:ID(),
   I.GeargrindersSpareKeys:ID(),
   I.NeuralSynapseEnhancer:ID(),
+  I.NexusKingsCommand:ID(),
   I.SpymastersWeb:ID(),
   -- TWW Other Items
   I.AstralGladiatorsBadge:ID(),
@@ -141,12 +142,12 @@ HL:RegisterForEvent(function()
   Fiend = (S.Mindbender:IsAvailable() and S.Mindbender) or (S.VoidWraith:IsAvailable() and S.VoidWraithAbility) or S.Shadowfiend
   S.ShadowCrash:RegisterInFlightEffect(205386)
   S.ShadowCrash:RegisterInFlight()
-  S.ShadowCrashTarget:RegisterInFlightEffect(205386)
+  S.ShadowCrashTarget:RegisterInFlightEffect(465522)
   S.ShadowCrashTarget:RegisterInFlight()
 end, "SPELLS_CHANGED", "LEARNED_SPELL_IN_TAB")
 S.ShadowCrash:RegisterInFlightEffect(205386)
 S.ShadowCrash:RegisterInFlight()
-S.ShadowCrashTarget:RegisterInFlightEffect(205386)
+S.ShadowCrashTarget:RegisterInFlightEffect(465522)
 S.ShadowCrashTarget:RegisterInFlight()
 
 --- ===== Helper Functions =====
@@ -246,7 +247,7 @@ end
 --- ===== CastTargetIf Condition Functions =====
 local function EvaluateTargetIfDPMain(TargetUnit)
   -- if=active_dot.devouring_plague<=1&dot.devouring_plague.remains<=gcd.max&(!talent.void_eruption|cooldown.void_eruption.remains>=gcd.max*3)|insanity.deficit<=35|buff.mind_devourer.up|buff.entropic_rift.up|buff.power_surge.up&buff.tww3_archon_4pc_helper.stack<4&buff.ascension.up
-  return S.DevouringPlagueDebuff:AuraActiveCount() <= 1 and Target:DebuffRemains(S.DevouringPlagueDebuff) <= GCDMax and (not S.VoidEruption:IsAvailable() or S.VoidEruption:CooldownRemains() >= GCDMax * 3) or Player:InsanityDeficit() <= 35 or Player:BuffUp(S.MindDevourerBuff) or EntropicRiftUp or Player:BuffUp(S.PowerSurgeBuff) and TWW3Archon4pcHelper() < 4 and Player:BuffUp(S.AscensionBuff)
+  return S.DevouringPlagueDebuff:AuraActiveCount() <= 1 and TargetUnit:DebuffRemains(S.DevouringPlagueDebuff) <= GCDMax and (not S.VoidEruption:IsAvailable() or S.VoidEruption:CooldownRemains() >= GCDMax * 3) or Player:InsanityDeficit() <= 35 or Player:BuffUp(S.MindDevourerBuff) or EntropicRiftUp or Player:BuffUp(S.PowerSurgeBuff) and TWW3Archon4pcHelper() < 4 and Player:BuffUp(S.AscensionBuff)
 end
 
 local function EvaluateTargetIfVoidBlastMain(TargetUnit)
@@ -359,9 +360,8 @@ local function AoEVariables()
   -- variable,name=dots_up,op=set,value=(active_dot.vampiric_touch+8*(action.shadow_crash.in_flight&action.shadow_crash.enabled))>=variable.max_vts|!variable.is_vt_possible
   VarDotsUp = ((S.VampiricTouchDebuff:AuraActiveCount() + 8 * num(Crash:InFlight() and Crash:IsAvailable())) >= VarMaxVTs or not VarIsVTPossible)
   -- variable,name=holding_crash,op=set,value=(variable.max_vts-active_dot.vampiric_touch)<4&raid_event.adds.in>15|raid_event.adds.in<10&raid_event.adds.count>(variable.max_vts-active_dot.vampiric_touch),if=variable.holding_crash&action.shadow_crash.enabled&raid_event.adds.exists
-  if VarHoldingCrash and Crash:IsAvailable() then
-    VarHoldingCrash = (VarMaxVTs - S.VampiricTouchDebuff:AuraActiveCount()) < 4
-  end
+  -- Note: Skipping the check for VarHoldingCrash already being true, as it caused a double Crash at the start of an AoE fight.
+  VarHoldingCrash = (VarMaxVTs - S.VampiricTouchDebuff:AuraActiveCount()) < 4
   -- variable,name=manual_vts_applied,op=set,value=(active_dot.vampiric_touch+8*!variable.holding_crash)>=variable.max_vts|!variable.is_vt_possible
   VarManualVTsApplied = ((S.VampiricTouchDebuff:AuraActiveCount() + 8 * num(not VarHoldingCrash)) >= VarMaxVTs or not VarIsVTPossible)
 end
@@ -431,7 +431,7 @@ local function Trinkets()
       end
     end
     -- use_item,use_off_gcd=1,name=perfidious_projector,if=gcd.remains>0&(!talent.voidheart|buff.voidheart.up|fight_remains<20)
-    if I.PerfidiousProjector:IsEquippedAndReady() and (not S.Voidheard:IsAvailable() or Player:BuffUp(S.VoidheartBuff) or BossFightRemains < 20) then
+    if I.PerfidiousProjector:IsEquippedAndReady() and (not S.Voidheart:IsAvailable() or Player:BuffUp(S.VoidheartBuff) or BossFightRemains < 20) then
       if Cast(I.PerfidiousProjector, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(45)) then return "perfidious_projector trinkets 16"; end
     end
   end
@@ -448,7 +448,7 @@ end
 
 local function CDs()
   -- potion,if=(buff.voidform.up&buff.power_infusion.up|buff.dark_ascension.up)&(fight_remains>=320|time_to_bloodlust>=320|buff.bloodlust.react)|fight_remains<=30
-  if Settings.Commons.Enabled.Potions and ((Player:BuffUp(S.VoidformBuff) or Player:PowerInfusionUp() or Player:BuffUp(S.DarkAscensionBuff)) and (FightRemains >= 320 or Player:BloodlustUp()) or BossFightRemains <= 30) then
+  if Settings.Commons.Enabled.Potions and (((Player:BuffUp(S.VoidformBuff) and Player:PowerInfusionUp()) or Player:BuffUp(S.DarkAscensionBuff)) and (FightRemains >= 320 or Player:BloodlustUp()) or BossFightRemains <= 30) then
     local PotionSelected = Everyone.PotionSelected()
     if PotionSelected and PotionSelected:IsReady() then
       if Cast(PotionSelected, nil, Settings.CommonsDS.DisplayStyle.Potions) then return "potion cds 2"; end
@@ -477,8 +477,12 @@ local function CDs()
     -- invoke_external_buff,name=bloodlust,if=buff.power_infusion.up&fight_remains<120|fight_remains<=40
     -- Note: Not handling external buffs
     -- power_infusion,if=(buff.voidform.up|buff.dark_ascension.up&(fight_remains<=80|fight_remains>=140)|active_allied_augmentations)&(!buff.power_infusion.up|set_bonus.tww2_4pc&buff.power_infusion.remains<=15)
-    if S.PowerInfusion:IsCastable() and Settings.Shadow.SelfPI and ((Player:BuffUp(S.VoidformBuff) or Player:BuffUp(S.DarkAscension) and (BossFightRemains <= 80 or BossFightRemains >= 140)) and (Player:PowerInfusionDown() or Player:HasTier("TWW2", 4) and Player:PowerInfusionRemains() <= 15)) then
+    if S.PowerInfusion:IsCastable() and Settings.Shadow.SelfPI and ((Player:BuffUp(S.VoidformBuff) or Player:BuffUp(S.DarkAscensionBuff) and (BossFightRemains <= 80 or BossFightRemains >= 140)) and (Player:PowerInfusionDown() or Player:HasTier("TWW2", 4) and Player:PowerInfusionRemains() <= 15)) then
       if Cast(S.PowerInfusion, Settings.Shadow.OffGCDasOffGCD.PowerInfusion) then return "power_infusion cds 12"; end
+    end
+    -- flash_heal,if=equipped.nexuskings_command&buff.oathbound.up&(!buff.boon_of_the_oathsworn.up|buff.boon_of_the_oathsworn.remains<3)&((talent.void_eruption&(buff.voidform.up|cooldown.void_eruption.up))|(talent.dark_ascension&cooldown.dark_ascension.up)|(talent.power_surge&cooldown.halo.up)|(talent.entropic_rift&cooldown.void_torrent.up))
+    if S.FlashHeal:IsReady() and (I.NexusKingsCommand:IsEquipped() and Player:BuffUp(S.OathboundBuff) and (Player:BuffDown(S.BoonOfTheOathswornBuff) or Player:BuffRemains(S.BoonOfTheOathswornBuff) < 3) and ((S.VoidEruption:IsAvailable() and (Player:BuffUp(S.VoidformBuff) or S.VoidEruption:CooldownUp())) or (S.DarkAscension:IsAvailable() and S.DarkAscension:CooldownUp()) or (S.PowerSurge:IsAvailable() and S.Halo:CooldownUp()) or (S.EntropicRift:IsAvailable() and S.VoidTorrent:CooldownUp()))) then
+      if Cast(S.FlashHeal, Settings.Shadow.GCDasOffGCD.FlashHeal) then return "flash_heal cds 13"; end
     end
     -- halo,if=talent.power_surge&(pet.fiend.active&cooldown.fiend.remains>=4&talent.mindbender|!talent.mindbender&!cooldown.fiend.up|active_enemies>2&!talent.inescapable_torment|!talent.dark_ascension)&(cooldown.mind_blast.charges=0|!cooldown.void_torrent.up|!talent.void_eruption|cooldown.void_eruption.remains>=gcd.max*4|buff.mind_devourer.up&talent.mind_devourer)
     if S.Halo:IsReady() and (S.PowerSurge:IsAvailable() and (FiendUp and Fiend:CooldownRemains() >= 4 and S.Mindbender:IsAvailable() or not S.Mindbender:IsAvailable() and Fiend:CooldownDown() or EnemiesCount10ySplash > 2 and not S.InescapableTorment:IsAvailable() or not S.DarkAscension:IsAvailable()) and (S.MindBlast:Charges() == 0 or S.VoidTorrent:CooldownDown() or not S.VoidEruption:IsAvailable() or S.VoidEruption:CooldownRemains() >= GCDMax * 4 or Player:BuffUp(S.MindDevourerBuff) and S.MindDevourer:IsAvailable())) then
@@ -519,8 +523,6 @@ local function HealForToF()
 end
 
 local function Main()
-  -- Reset variable.holding_crash to false for ST, in case it was set to true during AoE.
-  VarHoldingCrash = false
   -- variable,name=dots_up,op=set,value=active_dot.vampiric_touch=active_enemies|action.shadow_crash.in_flight,if=active_enemies<3
   if EnemiesCount10ySplash < 3 then
     VarDotsUp = S.VampiricTouchDebuff:AuraActiveCount() == EnemiesCount10ySplash or Crash:InFlight() or Player:IsCasting(S.VampiricTouch) and S.VampiricTouchDebuff:AuraActiveCount() == EnemiesCount10ySplash - 1
@@ -546,7 +548,7 @@ local function Main()
     if Everyone.CastTargetIf(S.DevouringPlague, Enemies10ySplash, "max", EvaluateTargetIfFilterTTDTimesDP, nil, not Target:IsSpellInRange(S.DevouringPlague)) then return "devouring_plague main 8"; end
   end
   -- void_bolt,target_if=max:target.time_to_die,if=insanity.deficit>16&cooldown.void_bolt.remains%gcd.max<=0.1
-  if S.VoidBolt:IsCastable() and (Player:InsanityDeficit() > 16 and S.VoidBolt:CooldownRemains() / Player:GCD() <= 0.1) then
+  if S.VoidBolt:IsCastable() and (Player:InsanityDeficit() > 16 and S.VoidBolt:CooldownRemains() / GCDMax <= 0.1) then
     if Everyone.CastTargetIf(S.VoidBolt, Enemies10ySplash, "max", EvaluateTargetIfFilterTTD, nil, not Target:IsInRange(46)) then return "void_bolt main 10"; end
   end
   -- devouring_plague,target_if=max:target.time_to_die*(dot.devouring_plague.remains<=gcd.max|variable.dr_force_prio|!talent.distorted_reality&variable.me_force_prio),if=active_dot.devouring_plague<=1&dot.devouring_plague.remains<=gcd.max&(!talent.void_eruption|cooldown.void_eruption.remains>=gcd.max*3)|insanity.deficit<=35|buff.mind_devourer.up|buff.entropic_rift.up|buff.power_surge.up&buff.tww3_archon_4pc_helper.stack<4&buff.ascension.up
@@ -611,7 +613,7 @@ local function Main()
   end
   -- divine_star
   if S.DivineStar:IsReady() then
-    if Cast(S.DivineStar, Settings.Shadow.GCDasOffGCD.DivineStar, not Target:IsInRange(30)) then return "divine_star main 40"; end
+    if Cast(S.DivineStar, Settings.Shadow.GCDasOffGCD.DivineStar, nil, not Target:IsInRange(30)) then return "divine_star main 40"; end
   end
   -- shadow_crash,if=raid_event.adds.in>20
   if Crash:IsCastable() then
@@ -685,7 +687,7 @@ local function APL()
     -- Interrupts
     local ShouldReturn = Everyone.Interrupt(S.Silence, Settings.CommonsDS.DisplayStyle.Interrupts); if ShouldReturn then return ShouldReturn; end
     -- variable,name=holding_crash,op=set,value=raid_event.adds.in<15
-    -- Note: We have no way of knowing if adds are coming, so don't ever purposely hold crash
+    -- Note: We have no way of knowing if adds are coming, so default to false.
     VarHoldingCrash = false
     PreferVT = Settings.Shadow.PreferVTWhenSTinDungeon and EnemiesCount10ySplash == 1 and Player:IsInDungeonArea() and Player:IsInParty() and not Player:IsInRaidArea()
     -- variable,name=pool_for_cds,op=set,value=(cooldown.void_eruption.remains<=gcd.max*3&talent.void_eruption|cooldown.dark_ascension.up&talent.dark_ascension)|talent.void_torrent&talent.psychic_link&cooldown.void_torrent.remains<=4&(!raid_event.adds.exists&spell_targets.vampiric_touch>1|raid_event.adds.in<=5|raid_event.adds.remains>=6&!variable.holding_crash)&!buff.voidform.up

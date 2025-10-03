@@ -90,7 +90,6 @@ local EventInfo = HR.Commons.Mage.EventInfo
 -- Tracks Arcane Harmony buff stacks for optimal Arcane Barrage timing
 local ArcaneHarmonyLastStack = 0
 EventInfo.ArcaneHarmonyLastStack = 0
-local ArcaneHarmonyThresholdNotified = false
 
 --- Arcane Surge Tracking
 -- Tracks Arcane Surge state for optimal burst windows
@@ -115,19 +114,12 @@ HL:RegisterForSelfCombatEvent(function(...)
     if auraData then
       ArcaneHarmonyLastStack = auraData.applications or 1
       EventInfo.ArcaneHarmonyLastStack = ArcaneHarmonyLastStack
-      local threshold = (18 - (6 * num(S.HighVoltage:IsAvailable())))
-      if ArcaneHarmonyLastStack >= (threshold - 2) and not ArcaneHarmonyThresholdNotified then
-        ArcaneHarmonyThresholdNotified = true
-      elseif ArcaneHarmonyLastStack < (threshold - 2) then
-        ArcaneHarmonyThresholdNotified = false
-      end
     end
   end
   
   if event == "SPELL_AURA_REMOVED" and spellID == S.ArcaneHarmonyBuff:ID() then
     ArcaneHarmonyLastStack = 0
     EventInfo.ArcaneHarmonyLastStack = 0
-    ArcaneHarmonyThresholdNotified = false
   end
 
   -- Track Arcane Surge state
@@ -145,23 +137,28 @@ HL:RegisterForSelfCombatEvent(function(...)
 
   -- Track Clearcasting procs
   if spellID == S.ClearcastingBuff:ID() then
-    if event == "SPELL_AURA_APPLIED" then
-      ClearcastingProcs = ClearcastingProcs + 1
+    if event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_APPLIED_DOSE" then
+      local AuraData = Player:BuffInfo(S.ClearcastingBuff, nil, true)
+      if AuraData then
+        ClearcastingProcs = AuraData.applications or 1
+      else
+        ClearcastingProcs = 1
+      end
       EventInfo.ClearcastingProcs = ClearcastingProcs
       LastClearcastingTime = GetTime()
       EventInfo.LastClearcastingTime = LastClearcastingTime
+    elseif event == "SPELL_AURA_REMOVED_DOSE" then
+      EventInfo.ClearcastingProcs = EventInfo.ClearcastingProcs - 1
     elseif event == "SPELL_AURA_REMOVED" then
-      ClearcastingProcs = math.max(0, ClearcastingProcs - 1)
-      EventInfo.ClearcastingProcs = ClearcastingProcs
+      EventInfo.ClearcastingProcs = 0
     end
   end
-end, "SPELL_AURA_APPLIED_DOSE", "SPELL_AURA_APPLIED", "SPELL_AURA_REMOVED")
+end, "SPELL_AURA_APPLIED_DOSE", "SPELL_AURA_REMOVED_DOSE", "SPELL_AURA_APPLIED", "SPELL_AURA_REMOVED")
 
 --- Combat Exit Handler
 HL:RegisterForEvent(function()
   ArcaneHarmonyLastStack = 0
   EventInfo.ArcaneHarmonyLastStack = 0
-  ArcaneHarmonyThresholdNotified = false
   ArcaneSurgeStartTime = 0
   EventInfo.ArcaneSurgeStartTime = 0
   ArcaneSurgeActive = false

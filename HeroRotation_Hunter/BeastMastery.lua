@@ -55,9 +55,9 @@ local Settings = {
 --- ===== Rotation Variables =====
 local BossFightRemains = 11111
 local FightRemains = 11111
-local VarBuffSyncActive = false
-local VarBuffSyncReady = false
-local VarBuffSyncRemains = 0
+local TWW3_2pc = Player:HasTier("TWW3", 2)
+local TWW3_4pc = Player:HasTier("TWW3", 4)
+local CotWCD = (Player:HeroTreeID() == 44 and TWW3_2pc) and 60 or 120
 local Enemies40y, PetEnemiesMixed, PetEnemiesMixedCount
 local TargetInRange40y, TargetInRange30y
 local TargetInRangePet30y
@@ -120,9 +120,20 @@ HL:RegisterForEvent(function()
 end, "PLAYER_REGEN_ENABLED")
 
 HL:RegisterForEvent(function()
+  TWW3_2pc = Player:HasTier("TWW3", 2)
+  TWW3_4pc = Player:HasTier("TWW3", 4)
+  CotWCD = (Player:HeroTreeID() == 44 and TWW3_2pc) and 60 or 120
   VarTrinketFailures = 0
   SetTrinketVariables()
 end, "PLAYER_EQUIPMENT_CHANGED")
+
+HL:RegisterForEvent(function()
+  -- Note: Swapping talent trees can have a slight delay before the API returns proper values.
+  Delay(2, function()
+      CotWCD = (Player:HeroTreeID() == 44 and TWW3_2pc) and 60 or 120
+    end
+  )
+end, "SPELLS_CHANGED", "LEARNED_SPELL_IN_TAB")
 
 --- ===== Helper Functions =====
 local function HowlSummonReady()
@@ -154,7 +165,7 @@ end
 
 local function EvaluateTargetIfBarbedShotST(TargetUnit)
   -- if=talent.wild_call&charges_fractional>1.4|buff.call_of_the_wild.up|full_recharge_time<gcd&cooldown.bestial_wrath.remains|talent.scent_of_blood&(cooldown.bestial_wrath.remains<12+gcd)|talent.furious_assault|talent.black_arrow&(talent.barbed_scales|talent.savagery)|fight_remains<9
-  return (S.WildCall:IsAvailable() and S.BarbedShot:ChargesFractional() > 1.4 or Player:BuffUp(S.CalloftheWildBuff) or S.BarbedShot:FullRechargeTime() < Player:GCD() and S.BestialWrath:CooldownDown() or S.ScentofBlood:IsAvailable() and (S.BestialWrath:CooldownRemains() < 12 + Player:GCD()) or S.FuriousAssault:IsAvailable() or S.BlackArrowTalent:IsAvailable() and (S.BarbedScales:IsAvailable() or S.Savagery:IsAvailable()) or BossFightRemains < 9)
+  return (S.WildCall:IsAvailable() and S.BarbedShot:ChargesFractional() > 1.4 or Player:BuffUp(S.CalloftheWildBuff) or S.BarbedShot:FullRechargeTime() < Player:GCD() and S.BestialWrath:CooldownDown() or S.ScentofBlood:IsAvailable() and (S.BestialWrath:CooldownRemains() < 12 + Player:GCD()) or S.FuriousAssault:IsAvailable() or S.BlackArrow:IsAvailable() and (S.BarbedScales:IsAvailable() or S.Savagery:IsAvailable()) or BossFightRemains < 9)
 end
 
 local function EvaluateTargetIfBlackArrowST(TargetUnit)
@@ -171,7 +182,7 @@ local function Precombat()
   -- Note: Moved to variable declarations and PLAYER_EQUIPMENT_CHANGED registration.
   -- Manually added opener abilities
   -- hunters_mark,if=debuff.hunters_mark.down
-  if S.HuntersMark:IsCastable() and (Target:DebuffDown(S.HuntersMark)) then
+  if S.HuntersMark:IsCastable() and (Target:DebuffDown(S.HuntersMarkDebuff, true)) then
     if Cast(S.HuntersMark, Settings.CommonsOGCD.GCDasOffGCD.HuntersMark) then return "hunters_mark precombat 2"; end
   end
   -- barbed_shot
@@ -219,8 +230,8 @@ local function DRCleave()
   if CDsON() and S.BestialWrath:IsCastable() and (S.CalloftheWild:CooldownRemains() > 20 or not S.CalloftheWild:IsAvailable()) then
     if Cast(S.BestialWrath, Settings.BeastMastery.GCDasOffGCD.BestialWrath) then return "bestial_wrath dr_cleave 4"; end
   end
-  -- barbed_shot,target_if=min:dot.barbed_shot.remains,if=full_recharge_time<gcd
-  if S.BarbedShot:IsCastable() and (S.BarbedShot:FullRechargeTime() < Player:GCD()) then
+  -- barbed_shot,target_if=min:dot.barbed_shot.remains,if=full_recharge_time<gcd|buff.thrill_of_the_hunt.remains<1.5*gcd
+  if S.BarbedShot:IsCastable() and (S.BarbedShot:FullRechargeTime() < Player:GCD() or Player:BuffRemains(S.ThrilloftheHuntBuff) < Player:GCD() * 1.5) then
     if Everyone.CastTargetIf(S.BarbedShot, Enemies40y, "min", EvaluateTargetIfFilterBarbedShot, nil, not Target:IsSpellInRange(S.BarbedShot)) then return "barbed_shot dr_cleave 6"; end
   end
   -- bloodshed
@@ -239,16 +250,21 @@ local function DRCleave()
   if S.ExplosiveShot:IsReady() and (S.ThunderingHooves:IsAvailable()) then
     if Cast(S.ExplosiveShot, Settings.CommonsOGCD.GCDasOffGCD.ExplosiveShot, nil, not TargetInRange40y) then return "explosive_shot dr_cleave 14"; end
   end
-  -- barbed_shot,target_if=min:dot.barbed_shot.remains,if=charges_fractional>=cooldown.kill_command.charges_fractional
-  if S.BarbedShot:IsCastable() and (S.BarbedShot:ChargesFractional() >= S.KillCommand:ChargesFractional()) then
-    if Everyone.CastTargetIf(S.BarbedShot, Enemies40y, "min", EvaluateTargetIfFilterBarbedShot, nil, not Target:IsSpellInRange(S.BarbedShot)) then return "barbed_shot dr_cleave 16"; end
+  -- Localize buff.withering_fire.tick_time_remains
+  local WFTTR = 999
+  if Player:BuffUp(S.WitheringFireBuff) then
+    WFTTR = 4 - S.BlackArrow:TimeSinceLastCast()
   end
-  -- kill_command
-  if S.KillCommand:IsReady() then
-    if Cast(S.KillCommand, nil, nil, not Target:IsSpellInRange(S.KillCommand)) then return "kill_command dr_cleave 18"; end
+  -- kill_command,if=buff.withering_fire.tick_time_remains>gcd&cooldown.black_arrow.remains>0.5|buff.withering_fire.down
+  if S.KillCommand:IsReady() and (WFTTR > Player:GCD() and S.BlackArrow:CooldownRemains() > 0.5 or Player:BuffDown(S.WitheringFireBuff)) then
+    if Cast(S.KillCommand, nil, nil, not Target:IsSpellInRange(S.KillCommand)) then return "kill_command dr_cleave 16"; end
   end
-  -- cobra_shot,if=focus.time_to_max<gcd*2
-  if S.CobraShot:IsReady() and (Player:FocusTimeToMax() < Player:GCD() * 2) then
+  -- barbed_shot,target_if=min:dot.barbed_shot.remains,if=buff.withering_fire.tick_time_remains>0.5&cooldown.black_arrow.remains>0.5|buff.withering_fire.down
+  if S.BarbedShot:IsCastable() and (WFTTR > 0.5 and S.BlackArrow:CooldownRemains() > 0.5 or Player:BuffDown(S.WitheringFireBuff)) then
+    if Everyone.CastTargetIf(S.BarbedShot, Enemies40y, "min", EvaluateTargetIfFilterBarbedShot, nil, not Target:IsSpellInRange(S.BarbedShot)) then return "barbed_shot dr_cleave 18"; end
+  end
+  -- cobra_shot,if=buff.withering_fire.down&focus.time_to_max<gcd*2
+  if S.CobraShot:IsReady() and (Player:BuffDown(S.WitheringFireBuff) and Player:FocusTimeToMax() < Player:GCD() * 2) then
     if Cast(S.CobraShot, nil, nil, not Target:IsSpellInRange(S.CobraShot)) then return "cobra_shot dr_cleave 20"; end
   end
   -- explosive_shot
@@ -262,40 +278,42 @@ local function DRST()
   if S.BlackArrow:IsReady() then
     if Cast(S.BlackArrow, nil, nil, not Target:IsSpellInRange(S.BlackArrow)) then return "kill_shot dr_st 2"; end
   end
-  -- bestial_wrath,if=cooldown.call_of_the_wild.remains>20|!talent.call_of_the_wild
-  if S.BestialWrath:IsReady() and (S.CalloftheWild:CooldownRemains() > 20 or not S.CalloftheWild:IsAvailable()) then
+  -- bestial_wrath,if=cooldown.call_of_the_wild.remains>30|!talent.call_of_the_wild|time_to_die.remains<cooldown.call_of_the_wild.remains
+  if CDsON() and S.BestialWrath:IsCastable() and (S.CalloftheWild:CooldownRemains() > 30 or not S.CalloftheWild:IsAvailable() or Target:TimeToDie() < S.CalloftheWild:CooldownRemains()) then
     if Cast(S.BestialWrath, Settings.BeastMastery.GCDasOffGCD.BestialWrath) then return "bestial_wrath dr_st 4"; end
-  end
-  -- barbed_shot,target_if=min:dot.barbed_shot.remains,if=full_recharge_time<gcd
-  if S.BarbedShot:IsCastable() and (S.BarbedShot:FullRechargeTime() < Player:GCD()) then
-    if Everyone.CastTargetIf(S.BarbedShot, Enemies40y, "min", EvaluateTargetIfFilterBarbedShot, nil, not Target:IsSpellInRange(S.BarbedShot)) then return "barbed_shot dr_st 6"; end
   end
   -- bloodshed
   if S.Bloodshed:IsCastable() then
-    if Cast(S.Bloodshed, Settings.BeastMastery.GCDasOffGCD.Bloodshed, nil, not Target:IsSpellInRange(S.Bloodshed)) then return "bloodshed dr_st 8"; end
+    if Cast(S.Bloodshed, Settings.BeastMastery.GCDasOffGCD.Bloodshed, nil, not Target:IsSpellInRange(S.Bloodshed)) then return "bloodshed dr_st 6"; end
   end
   -- call_of_the_wild
   if CDsON() and S.CalloftheWild:IsCastable() then
-    if Cast(S.CalloftheWild, Settings.BeastMastery.GCDasOffGCD.CallOfTheWild) then return "call_of_the_wild dr_st 10"; end
+    if Cast(S.CalloftheWild, Settings.BeastMastery.GCDasOffGCD.CallOfTheWild) then return "call_of_the_wild dr_st 8"; end
   end
-  -- kill_command
-  if S.KillCommand:IsReady() then
-    if Cast(S.KillCommand, nil, nil, not Target:IsSpellInRange(S.KillCommand)) then return "kill_command dr_st 12"; end
+  -- Localize buff.withering_fire.tick_time_remains
+  local WFTTR = 999
+  if Player:BuffUp(S.WitheringFireBuff) then
+    WFTTR = 4 - S.BlackArrow:TimeSinceLastCast()
   end
-  -- barbed_shot,target_if=min:dot.barbed_shot.remains
-  if S.BarbedShot:IsCastable() then
-    if Everyone.CastTargetIf(S.BarbedShot, Enemies40y, "min", EvaluateTargetIfFilterBarbedShot, nil, not Target:IsSpellInRange(S.BarbedShot)) then return "barbed_shot dr_st 14"; end
+  -- kill_command,if=buff.withering_fire.tick_time_remains>gcd&cooldown.black_arrow.remains>0.5|buff.withering_fire.down
+  if S.KillCommand:IsReady() and (WFTTR > Player:GCD() and S.BlackArrow:CooldownRemains() > 0.5 or Player:BuffDown(S.WitheringFireBuff)) then
+    if Cast(S.KillCommand, nil, nil, not Target:IsSpellInRange(S.KillCommand)) then return "kill_command dr_st 10"; end
   end
-  -- cobra_shot
-  if S.CobraShot:IsReady() then
-    if Cast(S.CobraShot, nil, nil, not Target:IsSpellInRange(S.CobraShot)) then return "cobra_shot dr_st 16"; end
+  -- barbed_shot,target_if=min:dot.barbed_shot.remains,if=buff.withering_fire.tick_time_remains>0.5&cooldown.black_arrow.remains>0.5|buff.withering_fire.down
+  -- Note: ST function, so only using Cast instead of CastTargetIf.
+  if S.BarbedShot:IsCastable() and (WFTTR > 0.5 and S.BlackArrow:CooldownRemains() > 0.5 or Player:BuffDown(S.WitheringFireBuff)) then
+    if Cast(S.BarbedShot, nil, nil, not Target:IsSpellInRange(S.BarbedShot)) then return "barbed_shot dr_st 12"; end
+  end
+  -- cobra_shot,if=buff.withering_fire.down
+  if S.CobraShot:IsReady() and (Player:BuffDown(S.WitheringFireBuff)) then
+    if Cast(S.CobraShot, nil, nil, not Target:IsSpellInRange(S.CobraShot)) then return "cobra_shot dr_st 14"; end
   end
 end
 
 local function Cleave()
-  -- bestial_wrath,if=buff.howl_of_the_pack_leader_cooldown.remains-buff.lead_from_the_front.duration<buff.lead_from_the_front.duration%gcd*0.5|!set_bonus.tww3_4pc
-  if CDsON() and S.BestialWrath:IsCastable() and (Player:BuffRemains(S.HowlofthePackLeaderCDBuff) - 12 < 12 / Player:GCD() * 0.5 or not Player:HasTier("TWW3", 4)) then
-    if Everyone.CastTargetIf(S.BestialWrath, Enemies40y, "min", EvaluateTargetIfFilterBarbedShot, nil, not TargetInRange40y, Settings.BeastMastery.GCDasOffGCD.BestialWrath) then return "bestial_wrath cleave 2"; end
+  -- bestial_wrath,if=buff.howl_of_the_pack_leader_cooldown.remains-buff.lead_from_the_front.duration<buff.lead_from_the_front.duration%gcd*0.5|!set_bonus.tww3_4pc|talent.multishot
+  if CDsON() and S.BestialWrath:IsCastable() and (Player:BuffRemains(S.HowlofthePackLeaderCDBuff) - 12 < 12 / Player:GCD() * 0.5 or not Player:HasTier("TWW3", 4) or S.MultiShot:IsAvailable()) then
+    if Cast(S.BestialWrath, Settings.BeastMastery.GCDasOffGCD.BestialWrath) then return "bestial_wrath cleave 2"; end
   end
   -- barbed_shot,target_if=min:dot.barbed_shot.remains,if=full_recharge_time<gcd|charges_fractional>=cooldown.kill_command.charges_fractional|talent.call_of_the_wild&cooldown.call_of_the_wild.ready|howl_summon.ready&full_recharge_time<8
   if S.BarbedShot:IsCastable() and (S.BarbedShot:FullRechargeTime() < Player:GCD() or S.BarbedShot:ChargesFractional() >= S.KillCommand:ChargesFractional() or S.CalloftheWild:IsAvailable() and S.CalloftheWild:CooldownUp() or HowlSummonReady() and S.BarbedShot:FullRechargeTime() < 8) then
@@ -363,30 +381,79 @@ local function ST()
 end
 
 local function Trinkets()
-  -- variable,name=buff_sync_ready,value=talent.call_of_the_wild&(prev_gcd.1.call_of_the_wild)|talent.bloodshed&(prev_gcd.1.bloodshed)|(!talent.call_of_the_wild&!talent.bloodshed)&(buff.bestial_wrath.up|cooldown.bestial_wrath.remains_guess<5)
-  VarBuffSyncReady = S.CalloftheWild:IsAvailable() and Player:PrevGCD(1, S.CalloftheWild) or S.Bloodshed:IsAvailable() and Player:PrevGCD(1, S.Bloodshed) or (not S.CalloftheWild:IsAvailable() and not S.Bloodshed:IsAvailable()) and (Player:BuffUp(S.BestialWrathBuff) or S.BestialWrath:CooldownRemains() < 5)
-  -- variable,name=buff_sync_remains,op=setif,value=cooldown.bestial_wrath.remains_guess,value_else=cooldown.call_of_the_wild.remains|cooldown.bloodshed.remains,condition=!talent.call_of_the_wild&!talent.bloodshed
-  VarBuffSyncRemains = (not S.CalloftheWild:IsAvailable() and not S.Bloodshed:IsAvailable()) and S.BestialWrath:CooldownRemains() or (S.CalloftheWild:CooldownRemains() or S.Bloodshed:CooldownRemains())
-  -- variable,name=buff_sync_active,value=talent.call_of_the_wild&buff.call_of_the_wild.up|talent.bloodshed&prev_gcd.1.bloodshed|(!talent.call_of_the_wild&!talent.bloodshed)&buff.bestial_wrath.up
-  VarBuffSyncActive = S.CalloftheWild:IsAvailable() and Player:BuffUp(S.CalloftheWildBuff) or S.Bloodshed:IsAvailable() and Player:PrevGCD(1, S.Bloodshed) or (not S.CalloftheWild:IsAvailable() and not S.Bloodshed:IsAvailable()) and Player:BuffUp(S.BestialWrathBuff)
-  -- variable,name=damage_sync_active,value=1
-  local VarDamageSyncActive = true
-  -- variable,name=damage_sync_remains,value=0
-  local VarDamageSyncRemains = 0
   if Settings.Commons.Enabled.Trinkets then
-    -- use_items,slots=trinket1:trinket2,if=this_trinket.has_use_buff&(variable.buff_sync_ready&(variable.stronger_trinket_slot=this_trinket_slot|other_trinket.cooldown.remains)|!variable.buff_sync_ready&(variable.stronger_trinket_slot=this_trinket_slot&(variable.buff_sync_remains>this_trinket.cooldown.duration%3&fight_remains>this_trinket.cooldown.duration+20|other_trinket.has_use_buff&other_trinket.cooldown.remains>variable.buff_sync_remains-15&other_trinket.cooldown.remains-5<variable.buff_sync_remains&variable.buff_sync_remains+45>fight_remains)|variable.stronger_trinket_slot!=this_trinket_slot&(other_trinket.cooldown.remains&(other_trinket.cooldown.remains-5<variable.buff_sync_remains&variable.buff_sync_remains>=20|other_trinket.cooldown.remains-5>=variable.buff_sync_remains&(variable.buff_sync_remains>this_trinket.cooldown.duration%3|this_trinket.cooldown.duration<fight_remains&(variable.buff_sync_remains+this_trinket.cooldown.duration>fight_remains)))|other_trinket.cooldown.ready&variable.buff_sync_remains>20&variable.buff_sync_remains<other_trinket.cooldown.duration%3)))|!this_trinket.has_use_buff&(this_trinket.cast_time=0|!variable.buff_sync_active)&(!this_trinket.is.junkmaestros_mega_magnet|buff.junkmaestros_mega_magnet.stack>10)&(!other_trinket.has_cooldown&(variable.damage_sync_active|this_trinket.is.junkmaestros_mega_magnet&buff.junkmaestros_mega_magnet.stack>25|!this_trinket.is.junkmaestros_mega_magnet&variable.damage_sync_remains>this_trinket.cooldown.duration%3)|other_trinket.has_cooldown&(!other_trinket.has_use_buff&(variable.stronger_trinket_slot=this_trinket_slot|other_trinket.cooldown.remains)&(variable.damage_sync_active|this_trinket.is.junkmaestros_mega_magnet&buff.junkmaestros_mega_magnet.stack>25|variable.damage_sync_remains>this_trinket.cooldown.duration%3&!this_trinket.is.junkmaestros_mega_magnet|other_trinket.cooldown.remains-5<variable.damage_sync_remains&variable.damage_sync_remains>=20)|other_trinket.has_use_buff&(variable.damage_sync_active|this_trinket.is.junkmaestros_mega_magnet&buff.junkmaestros_mega_magnet.stack>25|!this_trinket.is.junkmaestros_mega_magnet&variable.damage_sync_remains>this_trinket.cooldown.duration%3)&(other_trinket.cooldown.remains>=20|other_trinket.cooldown.remains-5>variable.buff_sync_remains)))|fight_remains<25&(variable.stronger_trinket_slot=this_trinket_slot|other_trinket.cooldown.remains)
-    if Trinket1 and Trinket1:IsReady() and not VarTrinket1Ex and not Player:IsItemBlacklisted(Trinket1) and (Trinket1:HasUseBuff() and (VarBuffSyncReady and (VarStrongerTrinketSlot == 1 or Trinket2:CooldownDown()) or not VarBuffSyncReady and (VarStrongerTrinketSlot == 1 and (VarBuffSyncRemains > VarTrinket1CD / 3 and BossFightRemains > VarTrinket1CD + 20 or Trinket2:HasUseBuff() and Trinket2:CooldownRemains() > VarBuffSyncRemains - 15 and Trinket2:CooldownRemains() - 5 < VarBuffSyncRemains and VarBuffSyncRemains + 45 > BossFightRemains) or VarStrongerTrinketSlot ~= 1 and (Trinket2:CooldownDown() and (Trinket2:CooldownRemains() - 5 < VarBuffSyncRemains and VarBuffSyncRemains >= 20 or Trinket2:CooldownRemains() - 5 >= VarBuffSyncRemains and (VarBuffSyncRemains > VarTrinket1CD / 3 or VarTrinket1CD < BossFightRemains and (VarBuffSyncRemains + VarTrinket1CD > BossFightRemains))) or Trinket2:CooldownUp() and VarBuffSyncRemains > 20 and VarBuffSyncRemains < VarTrinket2CD / 3))) or not Trinket1:HasUseBuff() and (VarTrinket1CastTime == 0 or not VarBuffSyncActive) and (Trinket1:ID() ~= I.JunkmaestrosMegaMagnet:ID() or Player:BuffStack(S.JunkmaestrosBuff) > 10) and (not Trinket2:HasCooldown() and (VarDamageSyncActive or Trinket1:ID() == I.JunkmaestrosMegaMagnet:ID() and Player:BuffStack(S.JunkmaestrosBuff) > 25 or Trinket1:ID() ~= I.JunkmaestrosMegaMagnet:ID() and VarDamageSyncRemains > VarTrinket1CD / 3) or Trinket2:HasCooldown() and (not Trinket2:HasUseBuff() and (VarStrongerTrinketSlot == 1 or Trinket2:CooldownDown()) and (VarDamageSyncActive or Trinket1:ID() == I.JunkmaestrosMegaMagnet:ID() and Player:BuffStack(S.JunkmaestrosBuff) > 25 or VarDamageSyncRemains > VarTrinket1CD / 3 and Trinket1:ID() ~= I.JunkmaestrosMegaMagnet:ID() or Trinket2:CooldownRemains() - 5 < VarDamageSyncRemains and VarDamageSyncRemains >= 20) or Trinket2:HasUseBuff() and (VarDamageSyncActive or Trinket1:ID() == I.JunkmaestrosMegaMagnet:ID() and Player:BuffStack(S.JunkmaestrosBuff) > 25 or Trinket1:ID() ~= I.JunkmaestrosMegaMagnet:ID() and VarDamageSyncRemains > VarTrinket1CD / 3) and (Trinket2:CooldownRemains() >= 20 or Trinket2:CooldownRemains() - 5 > VarBuffSyncRemains))) or BossFightRemains < 25 and (VarStrongerTrinketSlot == 1 or Trinket2:CooldownDown())) then
+    local VarQuiver, VarBW
+    -- variable,name=quiver_variable,op=set,value=0,if=cooldown.call_of_the_wild.remains<30
+    -- variable,name=quiver_variable,op=set,value=1,if=buff.blighted_quiver.stack>5&buff.latent_energy.stack>10|equipped.arazs_ritual_forge&(buff.blighted_quiver.stack>5|buff.latent_energy.stack>10)|buff.latent_energy.stack>16|fight_remains<(cooldown.call_of_the_wild.duration+20)
+    if S.CalloftheWild:CooldownRemains() < 30 then
+      VarQuiver = false
+    elseif Player:BuffStack(S.BlightedQuiverBuff) > 5 and Player:BuffStack(S.LatentEnergyBuff) > 10 or I.ArazsRitualForge:IsEquipped() and (Player:BuffStack(S.BlightedQuiverBuff) > 5 or Player:BuffStack(S.LatentEnergyBuff) > 10) or Player:BuffStack(S.LatentEnergyBuff) > 16 or FightRemains < (CotWCD + 20) then
+      VarQuiver = true
+    end
+    -- variable,name=bw_variable,op=set,value=0,if=!buff.bestial_wrath.up
+    -- variable,name=bw_variable,op=set,value=1,if=!talent.call_of_the_wild&buff.bestial_wrath.up&(buff.latent_energy.stack>0|equipped.arazs_ritual_forge&buff.latent_energy.stack>10)
+    if Player:BuffDown(S.BestialWrathBuff) then
+      VarBW = false
+    elseif not S.CalloftheWild:IsAvailable() and Player:BuffUp(S.BestialWrathBuff) and (Player:BuffUp(S.LatentEnergyBuff) or I.ArazsRitualForge:IsEquipped() and Player:BuffStack(S.LatentEnergyBuff) > 10) then
+      VarBW = true
+    end
+    local T1Check = Trinket1 and Trinket1:IsReady() and not VarTrinket1Ex and not Player:IsItemBlacklisted(Trinket1)
+    local T2Check = Trinket2 and Trinket2:IsReady() and not VarTrinket2Ex and not Player:IsItemBlacklisted(Trinket2)
+    -- use_items,check_existing=0,slots=trinket1:trinket2,if=!equipped.unyielding_netherprism&this_trinket.has_use_buff&(this_trinket.cooldown.duration%%cooldown.call_of_the_wild.duration=0&buff.call_of_the_wild.remains>14|!talent.call_of_the_wild&(other_trinket.has_use_buff|prev_gcd.1.bestial_wrath))
+    if T1Check and (not I.UnyieldingNetherprism:IsEquipped() and Trinket1:HasUseBuff() and (VarTrinket1CD % CotWCD == 0 and Player:BuffRemains(S.CalloftheWildBuff) > 14 or not S.CalloftheWild:IsAvailable() and (Trinket2:HasUseBuff() or Player:PrevGCD(1, S.BestialWrath)))) then
       if Cast(Trinket1, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket1Range)) then return "trinket1 (" .. Trinket1:Name() .. ") trinkets 2"; end
     end
-    if Trinket2 and Trinket2:IsReady() and not VarTrinket2Ex and not Player:IsItemBlacklisted(Trinket2) and (Trinket2:HasUseBuff() and (VarBuffSyncReady and (VarStrongerTrinketSlot == 2 or Trinket1:CooldownDown()) or not VarBuffSyncReady and (VarStrongerTrinketSlot == 2 and (VarBuffSyncRemains > VarTrinket2CD / 3 and BossFightRemains > VarTrinket2CD + 20 or Trinket1:HasUseBuff() and Trinket1:CooldownRemains() > VarBuffSyncRemains - 15 and Trinket1:CooldownRemains() - 5 < VarBuffSyncRemains and VarBuffSyncRemains + 45 > BossFightRemains) or VarStrongerTrinketSlot ~= 2 and (Trinket1:CooldownDown() and (Trinket1:CooldownRemains() - 5 < VarBuffSyncRemains and VarBuffSyncRemains >= 20 or Trinket1:CooldownRemains() - 5 >= VarBuffSyncRemains and (VarBuffSyncRemains > VarTrinket2CD / 3 or VarTrinket2CD < BossFightRemains and (VarBuffSyncRemains + VarTrinket2CD > BossFightRemains))) or Trinket1:CooldownUp() and VarBuffSyncRemains > 20 and VarBuffSyncRemains < VarTrinket1CD / 3))) or not Trinket2:HasUseBuff() and (VarTrinket2CastTime == 0 or not VarBuffSyncActive) and (Trinket2:ID() ~= I.JunkmaestrosMegaMagnet:ID() or Player:BuffStack(S.JunkmaestrosBuff) > 10) and (not Trinket1:HasCooldown() and (VarDamageSyncActive or Trinket2:ID() == I.JunkmaestrosMegaMagnet:ID() and Player:BuffStack(S.JunkmaestrosBuff) > 25 or Trinket2:ID() ~= I.JunkmaestrosMegaMagnet:ID() and VarDamageSyncRemains > VarTrinket2CD / 3) or Trinket1:HasCooldown() and (not Trinket1:HasUseBuff() and (VarStrongerTrinketSlot == 2 or Trinket1:CooldownDown()) and (VarDamageSyncActive or Trinket2:ID() == I.JunkmaestrosMegaMagnet:ID() and Player:BuffStack(S.JunkmaestrosBuff) > 25 or VarDamageSyncRemains > VarTrinket2CD / 3 and Trinket2:ID() ~= I.JunkmaestrosMegaMagnet:ID() or Trinket1:CooldownRemains() - 5 < VarDamageSyncRemains and VarDamageSyncRemains >= 20) or Trinket1:HasUseBuff() and (VarDamageSyncActive or Trinket2:ID() == I.JunkmaestrosMegaMagnet:ID() and Player:BuffStack(S.JunkmaestrosBuff) > 25 or Trinket2:ID() ~= I.JunkmaestrosMegaMagnet:ID() and VarDamageSyncRemains > VarTrinket2CD / 3) and (Trinket1:CooldownRemains() >= 20 or Trinket1:CooldownRemains() - 5 > VarBuffSyncRemains))) or BossFightRemains < 25 and (VarStrongerTrinketSlot == 2 or Trinket1:CooldownDown())) then
+    if T2Check and (not I.UnyieldingNetherprism:IsEquipped() and Trinket2:HasUseBuff() and (VarTrinket2CD % CotWCD == 0 and Player:BuffRemains(S.CalloftheWildBuff) > 14 or not S.CalloftheWild:IsAvailable() and (Trinket1:HasUseBuff() or Player:PrevGCD(1, S.BestialWrath)))) then
       if Cast(Trinket2, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket2Range)) then return "trinket2 (" .. Trinket2:Name() .. ") trinkets 4"; end
+    end
+    -- use_items,check_existing=0,slots=trinket1:trinket2,if=!equipped.unyielding_netherprism&this_trinket.has_use_buff&(other_trinket.cooldown.duration%%cooldown.call_of_the_wild.duration=0&(buff.call_of_the_wild.remains>14&other_trinket.cooldown.remains|cooldown.call_of_the_wild.remains>20&other_trinket.cooldown.remains<=cooldown.call_of_the_wild.remains)|!talent.call_of_the_wild&other_trinket.cooldown.remains)
+    if T1Check and (not I.UnyieldingNetherprism:IsEquipped() and Trinket1:HasUseBuff() and (VarTrinket2CD % CotWCD == 0 and (Player:BuffRemains(S.CalloftheWildBuff) > 14 and Trinket2:CooldownDown() or S.CalloftheWild:CooldownRemains() > 20 and Trinket2:CooldownRemains() <= S.CalloftheWild:CooldownRemains()) or not S.CalloftheWild:IsAvailable() and Trinket2:CooldownDown())) then
+      if Cast(Trinket1, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket1Range)) then return "trinket1 (" .. Trinket1:Name() .. ") trinkets 6"; end
+    end
+    if T2Check and (not I.UnyieldingNetherprism:IsEquipped() and Trinket2:HasUseBuff() and (VarTrinket1CD % CotWCD == 0 and (Player:BuffRemains(S.CalloftheWildBuff) > 14 and Trinket1:CooldownDown() or S.CalloftheWild:CooldownRemains() > 20 and Trinket1:CooldownRemains() <= S.CalloftheWild:CooldownRemains()) or not S.CalloftheWild:IsAvailable() and Trinket1:CooldownDown())) then
+      if Cast(Trinket2, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket2Range)) then return "trinket2 (" .. Trinket2:Name() .. ") trinkets 8"; end
+    end
+    -- use_items,check_existing=0,slots=trinket1:trinket2,if=!equipped.arazs_ritual_forge&this_trinket.is.unyielding_netherprism&(variable.quiver_variable&prev_gcd.1.call_of_the_wild|fight_remains<22&(buff.latent_energy.stack>8|!other_trinket.has_use_buff|other_trinket.cooldown.remains)|variable.bw_variable&prev_gcd.1.bestial_wrath)
+    if T1Check and (not I.ArazsRitualForge:IsEquipped() and Trinket1:ID() == I.UnyieldingNetherprism:ID() and (VarQuiver and Player:PrevGCD(1, S.CalloftheWild) or BossFightRemains < 22 and (Player:BuffStack(S.LatentEnergyBuff) > 8 or not Trinket2:HasUseBuff() or Trinket2:CooldownDown()) or VarBW and Player:PrevGCD(1, S.BestialWrath))) then
+      if Cast(Trinket1, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket1Range)) then return "trinket1 (" .. Trinket1:Name() .. ") trinkets 10"; end
+    end
+    if T2Check and (not I.ArazsRitualForge:IsEquipped() and Trinket2:ID() == I.UnyieldingNetherprism:ID() and (VarQuiver and Player:PrevGCD(1, S.CalloftheWild) or BossFightRemains < 22 and (Player:BuffStack(S.LatentEnergyBuff) > 8 or not Trinket1:HasUseBuff() or Trinket1:CooldownDown()) or VarBW and Player:PrevGCD(1, S.BestialWrath))) then
+      if Cast(Trinket2, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket2Range)) then return "trinket2 (" .. Trinket2:Name() .. ") trinkets 12"; end
+    end
+    -- use_items,check_existing=0,slots=trinket1:trinket2,if=!this_trinket.is.unyielding_netherprism&this_trinket.has_use_buff&(other_trinket.is.unyielding_netherprism&fight_remains<cooldown.call_of_the_wild.remains+cooldown.call_of_the_wild.duration+10&cooldown.call_of_the_wild.remains>20|buff.call_of_the_wild.remains>14|buff.call_of_the_wild.up&fight_remains<cooldown.call_of_the_wild.remains+15|fight_remains<42|!talent.call_of_the_wild&prev_gcd.1.bestial_wrath)
+    if T1Check and (VarTrinket1ID ~= I.UnyieldingNetherprism:ID() and Trinket1:HasUseBuff() and (VarTrinket2ID == I.UnyieldingNetherprism:ID() and FightRemains < S.CalloftheWild:CooldownRemains() + CotWCD + 10 and S.CalloftheWild:CooldownRemains() > 20 or Player:BuffRemains(S.CalloftheWildBuff) > 14 or Player:BuffUp(S.CalloftheWildBuff) and BossFightRemains < S.CalloftheWild:CooldownRemains() + 15 or BossFightRemains < 42 or not S.CalloftheWild:IsAvailable() and Player:PrevGCD(1, S.BestialWrath))) then
+      if Cast(Trinket1, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket1Range)) then return "trinket1 (" .. Trinket1:Name() .. ") trinkets 14"; end
+    end
+    if T2Check and (VarTrinket2ID ~= I.UnyieldingNetherprism:ID() and Trinket2:HasUseBuff() and (VarTrinket1ID == I.UnyieldingNetherprism:ID() and FightRemains < S.CalloftheWild:CooldownRemains() + CotWCD + 10 and S.CalloftheWild:CooldownRemains() > 20 or Player:BuffRemains(S.CalloftheWildBuff) > 14 or Player:BuffUp(S.CalloftheWildBuff) and BossFightRemains < S.CalloftheWild:CooldownRemains() + 15 or BossFightRemains < 42 or not S.CalloftheWild:IsAvailable() and Player:PrevGCD(1, S.BestialWrath))) then
+      if Cast(Trinket2, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket2Range)) then return "trinket2 (" .. Trinket2:Name() .. ") trinkets 16"; end
+    end
+    -- use_items,check_existing=0,slots=trinket1:trinket2,if=this_trinket.is.unyielding_netherprism&(variable.quiver_variable&prev_gcd.1.call_of_the_wild|fight_remains<22&(buff.latent_energy.stack>8|!other_trinket.has_use_buff|other_trinket.cooldown.remains)|variable.bw_variable&prev_gcd.1.bestial_wrath)
+    if T1Check and (VarTrinket1ID == I.UnyieldingNetherprism:ID() and (VarQuiver and Player:PrevGCD(1, S.CalloftheWild) or BossFightRemains < 22 and (Player:BuffStack(S.LatentEnergyBuff) > 8 or not Trinket2:HasUseBuff() or Trinket2:CooldownDown()) or VarBW and Player:PrevGCD(1, S.BestialWrath))) then
+      if Cast(Trinket1, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket1Range)) then return "trinket1 (" .. Trinket1:Name() .. ") trinkets 18"; end
+    end
+    if T2Check and (VarTrinket2ID == I.UnyieldingNetherprism:ID() and (VarQuiver and Player:PrevGCD(1, S.CalloftheWild) or BossFightRemains < 22 and (Player:BuffStack(S.LatentEnergyBuff) > 8 or not Trinket1:HasUseBuff() or Trinket1:CooldownDown()) or VarBW and Player:PrevGCD(1, S.BestialWrath))) then
+      if Cast(Trinket2, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket2Range)) then return "trinket2 (" .. Trinket2:Name() .. ") trinkets 20"; end
+    end
+    -- use_items,check_existing=0,slots=trinket1:trinket2,if=!equipped.arazs_ritual_forge&other_trinket.has_use_buff&this_trinket.is.unyielding_netherprism&(buff.call_of_the_wild.remains>14|!talent.call_of_the_wild&buff.bestial_wrath.remains>14)&buff.latent_energy.stack>3&(buff.latent_energy.stack+floor((fight_remains-20)%cooldown.call_of_the_wild.duration)*(cooldown.call_of_the_wild.duration%10))>17
+    if T1Check and (not I.ArazsRitualForge:IsEquipped() and Trinket2:HasUseBuff() and VarTrinket1ID == I.UnyieldingNetherprism:ID() and (Player:BuffRemains(S.CalloftheWildBuff) > 14 or not S.CalloftheWild:IsAvailable() and Player:BuffRemains(S.BestialWrathBuff) > 14) and Player:BuffStack(S.LatentEnergyBuff) > 3 and (Player:BuffStack(S.LatentEnergyBuff) + mathfloor((FightRemains - 20) / CotWCD) * (CotWCD / 10)) > 17) then
+      if Cast(Trinket1, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket1Range)) then return "trinket1 (" .. Trinket1:Name() .. ") trinkets 22"; end
+    end
+    if T2Check and (not I.ArazsRitualForge:IsEquipped() and Trinket1:HasUseBuff() and VarTrinket2ID == I.UnyieldingNetherprism:ID() and (Player:BuffRemains(S.CalloftheWildBuff) > 14 or not S.CalloftheWild:IsAvailable() and Player:BuffRemains(S.BestialWrathBuff) > 14) and Player:BuffStack(S.LatentEnergyBuff) > 3 and (Player:BuffStack(S.LatentEnergyBuff) + mathfloor((FightRemains - 20) / CotWCD) * (CotWCD / 10)) > 17) then
+      if Cast(Trinket2, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket2Range)) then return "trinket2 (" .. Trinket2:Name() .. ") trinkets 24"; end
+    end
+    -- use_items,check_existing=0,slots=trinket1:trinket2,if=this_trinket.has_use_damage&(cooldown.call_of_the_wild.remains>20|!talent.call_of_the_wild&prev_gcd.1.bestial_wrath)
+    if T1Check and (Trinket1:HasUseDamage() and (S.CalloftheWild:CooldownRemains() > 20 or not S.CalloftheWild:IsAvailable() and Player:PrevGCD(1, S.BestialWrath))) then
+      if Cast(Trinket1, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket1Range)) then return "trinket1 (" .. Trinket1:Name() .. ") trinkets 26"; end
+    end
+    if T2Check and (Trinket2:HasUseDamage() and (S.CalloftheWild:CooldownRemains() > 20 or not S.CalloftheWild:IsAvailable() and Player:PrevGCD(1, S.BestialWrath))) then
+      if Cast(Trinket2, nil, Settings.CommonsDS.DisplayStyle.Trinkets, not Target:IsInRange(VarTrinket2Range)) then return "trinket2 (" .. Trinket2:Name() .. ") trinkets 28"; end
     end
   end
   if Settings.Commons.Enabled.Items then
     -- Manually added: use_items for non-trinkets
     local ItemToUse, _, ItemRange = Player:GetUseableItems(OnUseExcludes, nil, true)
     if ItemToUse then
-      if Cast(ItemToUse, nil, Settings.CommonsDS.DisplayStyle.Items, not Target:IsInRange(ItemRange)) then return "Generic use_items for " .. ItemToUse:Name() .. " trinkets 6"; end
+      if Cast(ItemToUse, nil, Settings.CommonsDS.DisplayStyle.Items, not Target:IsInRange(ItemRange)) then return "Generic use_items for " .. ItemToUse:Name() .. " trinkets 30"; end
     end
   end
 end
@@ -463,7 +530,7 @@ local function APL()
     if Settings.Commons.Enabled.Trinkets or Settings.Commons.Enabled.Items then
       local ShouldReturn = Trinkets(); if ShouldReturn then return ShouldReturn; end
     end
-    if S.BlackArrow:IsLearned() then
+    if S.BlackArrow:IsAvailable() then
       -- call_action_list,name=drst,if=talent.black_arrow&(active_enemies<2|!talent.beast_cleave&active_enemies<3)
       if PetEnemiesMixedCount < 2 or not S.BeastCleave:IsAvailable() and PetEnemiesMixedCount < 3 then
         local ShouldReturn = DRST(); if ShouldReturn then return ShouldReturn; end
@@ -473,9 +540,8 @@ local function APL()
         local ShouldReturn = DRCleave(); if ShouldReturn then return ShouldReturn; end
       end
     else
-      -- call_action_list,name=st,if=!talent.black_arrow&(active_enemies<2|!talent.beast_cleave&active_enemies>2)
-      -- Note: Changed last enemy count to >1 to prevent a scenario where we have 2 targets and suggest nothing.
-      if PetEnemiesMixedCount < 2 or not S.BeastCleave:IsAvailable() and PetEnemiesMixedCount > 1 then
+      -- call_action_list,name=st,if=!talent.black_arrow&(active_enemies<2|!talent.beast_cleave&active_enemies<3)
+      if PetEnemiesMixedCount < 2 or not S.BeastCleave:IsAvailable() and PetEnemiesMixedCount < 3 then
         local ShouldReturn = ST(); if ShouldReturn then return ShouldReturn; end
       end
       -- call_action_list,name=cleave,if=!talent.black_arrow&(active_enemies>2|talent.beast_cleave&active_enemies>1)
